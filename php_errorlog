@@ -1,0 +1,11 @@
+[05-Jul-2016 23:33:23 Etc/GMT0] PHP Fatal error:  Call to undefined function convertToGalleons() in /home/thegeeki/public_html/Sources/Load.php(2185) : eval()'d code on line 174
+[07-Jul-2016 20:58:42 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:58:44 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:58:45 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:58:47 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:58:49 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:58:50 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:59:07 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:59:08 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 20:59:09 CST6CDT] PHP Parse error:  syntax error, unexpected 'if' (T_IF) in /home/thegeeki/public_html/Sources/Subs.php on line 16
+[07-Jul-2016 21:59:18 America/New_York] PHP Fatal error:  Call to undefined function call_integration_hook() in /home/thegeeki/public_html/Sources/Load.php on line 330
