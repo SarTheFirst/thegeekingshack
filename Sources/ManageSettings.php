@@ -98,7 +98,6 @@ function ModifyFeatureSettings()
 	$subActions = array(
 		'basic' => 'ModifyBasicSettings',
 		'layout' => 'ModifyLayoutSettings',
-		'custombbc' => 'CustomBBCodes_Controller',
 		'karma' => 'ModifyKarmaSettings',
 		'sig' => 'ModifySignatureSettings',
 		'profile' => 'ShowCustomProfiles',
@@ -192,12 +191,6 @@ function ModifyModSettings()
 		'tabs' => array(
 			'general' => array(
 			),
-			// BEGIN MOD CustomBlocks
-			'cb' => array(
-				'label' => $txt['cb'],
-				'description' => $txt['cb_desc'],
-			),
-			// END MOD CustomBlocks
 		),
 	);
 

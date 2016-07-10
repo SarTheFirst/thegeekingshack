@@ -173,30 +173,16 @@ function template_body_above()
 	echo !empty($settings['forum_width']) ? '
 <div id="wrapper" style="width: ' . $settings['forum_width'] . '">' : '', '
 	<div id="header"><div class="frame">
-		<!-- BEGIN MOD CustomBlocks -->';
-	if (!empty($context['cb_header_above']))
-		echo $context['cb_header_above'];
-	echo '
-		<!-- END MOD CustomBlocks -->
 		<div id="top_section">
-			<!-- BEGIN MOD CustomBlocks -->';
-	if (!empty($context['cb_header']))
-		echo $context['cb_header'];
-	else
-	{
-		echo '
 			<h1 class="forumtitle">
 				<a href="', $scripturl, '">', empty($context['header_logo_url_html_safe']) ? $context['forum_name'] : '<img src="' . $context['header_logo_url_html_safe'] . '" alt="' . $context['forum_name'] . '" />', '</a>
 			</h1>';
 
-		// the upshrink image, right-floated
-		echo '
-			<img id="upshrink" src="', $settings['images_url'], '/upshrink.png" alt="*" title="', $txt['upshrink_description'], '" style="display: none;" />';
-		echo '
-			', empty($settings['site_slogan']) ? '<img id="smflogo" src="' . $settings['images_url'] . '/smflogo.png" alt="Simple Machines Forum" title="Simple Machines Forum" />' : '<div id="siteslogan" class="floatright">' . $settings['site_slogan'] . '</div>';
-	}
+	// the upshrink image, right-floated
 	echo '
-			<!-- END MOD CustomBlocks -->
+			<img id="upshrink" src="', $settings['images_url'], '/upshrink.png" alt="*" title="', $txt['upshrink_description'], '" style="display: none;" />';
+	echo '
+			', empty($settings['site_slogan']) ? '<img id="smflogo" src="' . $settings['images_url'] . '/smflogo.png" alt="Simple Machines Forum" title="Simple Machines Forum" />' : '<div id="siteslogan" class="floatright">' . $settings['site_slogan'] . '</div>', '
 		</div>
 		<div id="upper_section" class="middletext"', empty($options['collapse_header']) ? '' : ' style="display: none;"', '>
 			<div class="user">';
@@ -289,11 +275,6 @@ function template_body_above()
 		</div>
 		<br class="clear" />';
 
-	// BEGIN MOD CustomBlocks
-	if (!empty($context['cb_header_below']))
-		echo $context['cb_header_below'];
-	// END MOD CustomBlocks
-
 	// Define the upper_section toggle in JavaScript.
 	echo '
 		<script type="text/javascript"><!-- // --><![CDATA[
@@ -354,14 +335,6 @@ function template_body_below()
 	// Show the "Powered by" and "Valid" logos, as well as the copyright. Remember, the copyright must be somewhere!
 	echo '
 	<div id="footer_section"><div class="frame">
-		<!-- BEGIN MOD CustomBlocks -->';
-	if (!empty($context['cb_footer_above']))
-		echo $context['cb_footer_above'];
-	if (!empty($context['cb_footer']))
-		echo $context['cb_footer'];
-	else
-	{
-		echo '
 		<ul class="reset">
 			<li class="copyright">', theme_copyright(), '</li>
 			<li><a id="button_xhtml" href="http://validator.w3.org/check?uri=referer" target="_blank" class="new_win" title="', $txt['valid_xhtml'], '"><span>', $txt['xhtml'], '</span></a></li>
@@ -369,14 +342,10 @@ function template_body_below()
 			<li class="last"><a id="button_wap2" href="', $scripturl , '?wap2" class="new_win"><span>', $txt['wap2'], '</span></a></li>
 		</ul>';
 
-		// Show the load time?
-		if ($context['show_load_time'])
-			echo '
+	// Show the load time?
+	if ($context['show_load_time'])
+		echo '
 		<p>', $txt['page_created'], $context['load_time'], $txt['seconds_with'], $context['load_queries'], $txt['queries'], '</p>';
-	}
-	if (!empty($context['cb_footer_below']))
-		echo $context['cb_footer_below'];
-	// END MOD CustomBlocks
 
 	echo '
 	</div></div>', !empty($settings['forum_width']) ? '

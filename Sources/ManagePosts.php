@@ -63,7 +63,6 @@ function ManagePostSettings()
 	$subActions = array(
 		'posts' => 'ModifyPostSettings',
 		'bbc' => 'ModifyBBCSettings',
-		'custombbc' => 'CustomBBCodes_Controller',
 		'censor' => 'SetCensor',
 		'topics' => 'ModifyTopicSettings',
 	);

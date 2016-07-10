@@ -21,20 +21,20 @@ $mmessage = 'Okay faithful users...we\'re attempting to restore an older backup 
 $mbname = 'The Geeking Shack';		# The name of your forum.
 $language = 'english';		# The default language file set for the forum.
 $boardurl = 'http://thegeekingshack.com';		# URL to your forum's folder. (without the trailing /!)
-$webmaster_email = 'board@thegeekingshack.com';		# Email address to send emails from. (like noreply@yourdomain.com.)
-$cookiename = 'SMFCookie554';		# Name of the cookie to set for authentication.
+$webmaster_email = 'admin@thegeekingshack.com';		# Email address to send emails from. (like noreply@yourdomain.com.)
+$cookiename = 'SMFCookie975';		# Name of the cookie to set for authentication.
 
 ########## Database Info ##########
 $db_type = 'mysql';
 $db_server = 'localhost';
-$db_name = 'thegeeki_smf227';
-$db_user = 'thegeeki_smf227';
-$db_passwd = '3-o(S4JlP9';
+$db_name = 'thegeeki_smf519';
+$db_user = 'thegeeki_smf519';
+$db_passwd = 'P))54bS48S';
 $ssi_db_user = '';
 $ssi_db_passwd = '';
 $db_prefix = 'smf_';
 $db_persist = 0;
-$db_error_send = 0;
+$db_error_send = 1;
 
 ########## Directories/Files ##########
 # Note: These directories do not have to be changed unless you move things.

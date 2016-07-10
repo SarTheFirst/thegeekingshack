@@ -1,7 +1,0 @@
-
-
-# CUSTOM BBCODES MANAGER BEGIN
-RewriteEngine on
-RewriteRule ^(.*)\.(gif|png)_(\d+) $1\.$2
-RewriteRule ^(.*)_(\d+)\.(gif|png) $1\.$3
-# CUSTOM BBCODES MANAGER ENDS

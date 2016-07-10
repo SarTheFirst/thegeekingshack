@@ -1,0 +1,1156 @@
+
+
+/*  These are for the staffers' custom BBCode */
+
+.aali {
+	color: hotpink;
+	font-family: Book Antiqua, Verdana, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 11pt;
+}
+
+.acorn {
+	color: black;
+	font-size: 8pt;
+}
+
+.addie {
+	color: #F9A7B0;
+	font-family: purisa medium, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.aj {
+    	color: thistle;
+    	font-family: narkisim, Verdana, Arial, Helvetica, sans-serif;
+ 	font-size: 11pt;
+}
+
+.aj a:hover {
+    	color: purple;
+}
+
+.alec {
+	color: #22316c;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+}
+
+.alec a {
+	color: lightskyblue;
+
+}
+
+.alec a:hover {
+	color: lightskyblue;
+
+}
+.alex a{
+	color: darkseagreen;
+}
+.alex a:hover{
+	color: skyblue;
+}
+.alura {
+	color: #00cccc;
+	font-family: times new roman, Verdana, Arial, Helvetica, sans-serif;
+	size: 12pt;
+	letter-spacing: 0.75px;
+}
+
+.alura a {
+   	color: #d0f0c0;
+}
+
+.alura a:hover {
+    	color: #B6D1A8;
+}
+
+.aly {
+	color: black;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 10pt; 
+}
+
+.aly a {
+	color: lightblue; 
+}
+
+.aly a:hover {
+	color: lightblue; 
+}
+
+.ana {
+	color: black;
+	font-family: papyrus, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+}
+.anna{
+	color: black;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+.anna a{
+	color: powderblue;
+}
+.anna a:hover{
+	color: navy;
+}
+.ang {
+	color: #68c1b8;
+	font-family: "times new roman";
+	font-size: 10pt;
+}
+
+.arc {
+	color: #81be62;
+	font-family: comic sans ms, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.arc a {
+    	color: #b4d9b4;
+}
+.aus{
+    color:skyblue;
+    font-size: 10px;
+}
+.aus a{
+    color:lawngreen;
+}
+.aus a hover{
+    color:limegreen;
+}
+.azul {
+	color: #00ddff;
+}
+
+.beth {
+	color: #c6ce91;
+	font-family: "Times New Roman", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+.beth a {
+	color: #47476B;
+}
+.beth a:hover {
+	color: #FFFFFF;
+}
+
+.blz {
+	color: #07074a;
+	font-family: "Times New Roman", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.blz a {
+	color: white;
+}
+
+.blz a:hover {
+	color: #82CFFD;
+}
+
+.bn {
+    	color: thistle;
+    	font-family: Georgia, Verdana, Arial, Helvetica, sans-serif;
+    	line-height: 1.5em;
+
+}
+.bn a {
+	color: orange;
+
+}
+
+.bp {
+	color: springgreen;
+	font-family: Bradley Hand ITC, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16pt;
+	font-weight: bold;
+}
+
+.brian {
+	color: darkred;
+	font-family: segoe print, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+
+}
+
+.brian a {
+	color: #f3f3f3;
+
+}
+
+.bsd {
+	color: #E8D216;
+	font-family: Helvetica, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.caleb {
+	color: aquamarine;
+	display: inline-block;
+	text-align: justify;
+	letter-spacing: 0.22ex;
+	line-height: 2.22ex;
+	font-family: "Franklin Gothic medium", Verdana, Arial, Helvetica, sans-serif;
+}
+
+.cari {
+    	color: #A0CFEC;
+    	font-family: Sylfaen, Verdana, Arial, Helvetica, sans-serif;
+    	font-size: 11pt;
+}
+
+.carrie {
+	color: palegreen;
+	font-family: Century Gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.cassi {
+    	color: indigo;
+    	font-family: sans serif; 
+    	font-size: 10pt;
+}
+
+.cassi a {
+	color: lightgrey;
+}
+
+.cassi a:hover {
+	color: darkseagreen;
+}
+
+.cealla {
+	color: #85ff0a;
+	font-family: parade, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}	
+
+.clau {
+	color: #A4A4A4;
+	font-family: Sylfaen, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	line-height: 1.2em;
+}
+
+.clau a {
+    	color: #00FF00;
+}
+
+.clau a:hover {
+    	color: #000000;
+}
+
+.con {
+	color: Midnightblue;
+	font-family: Palatino Linotype, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+.con a {
+	color: cadetblue;
+
+}
+
+.con a:hover {
+	color: deepskyblue;
+
+}
+
+.cort {
+	font-style: normal;
+	font-family: trebuchet ms, Verdana, Arial, Helvetica, sans-serif;
+	color: #75c4fd;
+	font-size: 10pt;
+	font-weight: normal;
+}
+
+.cort a {
+	color: #3c0b53;
+
+}
+
+.cort a:hover {
+	color: black;
+
+}
+
+.court {
+	color: #95b6f8;
+	font-family: segoe print, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	font-style: italic;
+}
+
+.court a {
+	color: #bff8d9;
+
+}
+
+.court a:hover {
+	color: #9699f3;
+
+}
+
+.cres {
+	color: chartreuse;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+}
+
+.crystal {
+	color: thistle;
+}
+
+.dawn {
+	color: dodgerblue;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.deso {
+	color: #36dbca;
+	font-family: "Times New Roman", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.deso a {
+	color: silver;
+
+}
+	
+
+.dip {
+	color: thistle;
+	font-family: MS Reference Sans Serif, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.dp {
+	color: #660066;
+	font-family: MS Reference Sans Serif, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.dru {
+    	font-family: Garamond, Verdana, Arial, Helvetica, sans-serif;
+    	color: #eecc8ec;
+    	font-size: 11pt;
+	font-weight: bold;
+}
+
+.dru a {
+	color: #bcd2ee;
+}
+
+.dyl {
+	color: black;
+	font-family: courier, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 8pt;
+}
+
+.alex {
+	color:#2f0052;
+	font-family: Andalus, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.eric {
+	color: #77ddbb;
+	font-family: ms sans serif, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.eric a {
+	color: #111111;
+}
+
+.erin {
+	color: darkseagreen;
+	font-size: 10pt;
+}
+.eva{
+	color: plum;
+}
+.eva a{
+	color: turquoise;	
+}
+.eva a:hover{
+	color:palegreen;	
+}
+.ff {
+	color: #7abfad;
+}
+
+.fysl {
+	color: violet;
+	font-family: Monotype Corsiva, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13pt;
+}
+
+.gap {
+	color: palegreen;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.geri {
+    	color: MediumAquamarine;
+    	font-family: Calibri, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.geri a {
+    	color: darkslateblue;
+}
+
+.geri a:hover {
+    	color: bisque;
+}  
+
+.gina {
+	color: #fc89ac;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.god {
+	color: palegreen;
+	font-family: courier new, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.han {
+	color: hotpink;
+	font-family: century gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	letter-spacing: 1px;
+}
+
+.han a {
+	color: pink;
+}
+
+.han a:hover {
+	color: skyblue;
+}
+
+.isla {
+	color: #ffd800;
+	font-family: Sylfaen, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	word-spacing: 0.2ex;
+	letter-spacing: 0.33ex;
+}
+
+.isla a {
+   	 color: #F7B565;
+}
+
+.isla a:hover {
+   	 color: #AAD4FE;
+}
+
+.isti {
+	color: lightgreen;
+	font-family: Arial Narrow, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.jd {
+	color: #243b0b;
+    	letter-spacing: 1pt;
+}
+
+.jd a {
+    	color: #333333;
+}
+
+.jas {
+	color: turquoise;
+	font-family: courier new, Verdana, Arial, Helvetica, sans-serif;
+}
+.jas a {
+	color: palegreen;
+}
+.jas a:hover{
+	color: sandybrown;
+}
+.jade {
+	color: #0e423e;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.jade a {
+	color:  #c3f1c3;
+}
+
+.jade a:hover {
+	color: #9ae30e;
+
+}
+
+.jeff {
+
+	color: black;
+	font-family: times new roman, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.jeff a {
+	color: midnightblue;
+
+}
+
+.jen {
+    	/*letter-spacing: 0.1em;
+    	word-spacing: 0.1em;*/
+    	line-height: 1.3em;
+    	color: #391219;
+    	font-family: "adobe-garamond-pro","Georgia",serif, Verdana, Arial, Helvetica, sans-serif;
+    	font-size: 11pt;
+}
+
+.jen a {
+    	color: #ccff66;
+}
+
+.jen a:hover {
+    	color: #ffff66;
+}
+
+.jen h1, .jen h2, .jen h3, .jen h4, .jen h5, .jen h6 {
+	font-family: "luminance-sc";
+	margin-top: 0.5 em;
+	margin-bottom: 0;
+	line-height: 1.3 em;
+}
+
+.jes {
+	color: #ffff7e;
+	font-family: ebrima, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.jes a {
+
+	color: black;
+
+}
+
+.jess {
+	color: #00ee99;
+	font-family: Garamond, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.john {
+	color: #abd1ab;
+
+}
+
+.john a {
+	color: black;
+
+}
+
+.jr {
+   	color: #fafc88;
+    	font-family: century;, Verdana, Arial, Helvetica, sans-serif
+	font-size: 10pt;
+}
+
+.jr a {
+    	color: #424347;
+}
+
+.jr a:hover {
+    	color: black;
+}
+
+.jrc {
+	color: #003300;
+	font-family: Nyala, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13pt;
+}
+
+.jrc a {
+	color: limegreen;
+}
+
+.jrc a:hover {
+	color: springgreen;
+}
+
+
+.jt {
+	color: black;
+	font-family: century gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.jules {
+	color: gold;
+	font-family: comic sans ms, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13pt;
+}
+
+.julia {
+	color: #d1ffb3;
+	font-family: century old style, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+
+}
+
+.junie {
+	color: midnightblue;
+	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.junie a {
+	color: #33FFCC;
+}
+
+
+.junie a:hover {
+	color: #00C7FC;
+}
+
+.kelly {
+	color: papayawhip;
+	font-family: cursive, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.kepi {
+	color:  #57d9FF;
+}
+
+.kepi a {
+   	color: lemonchiffon;
+}
+.kepi a:hover{
+	color: lemonchiffon;
+}
+
+.kinda {
+   	color: #48cccd;
+	font-family: bookman old style, Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    text-align: justify;
+}
+
+.kinda a {
+	color: #6afb92;
+}
+
+.kinda a:hover {
+	color: #f778a1;
+
+}
+
+.kira {
+	color: #B39EFF;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
+
+.krissy {
+	color: pink;
+	font-size: 18pt;
+	font-family: Pristina, Verdana, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+.lan {
+	color: #330000;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.lauryn {
+	color: indigo;
+	font-family: palatino linotype, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.lewy {
+	color: black;
+	font-family: Gisha, Verdana, Arial, Helvetica, sans-serif;
+	display: inline-block;
+	text-align: justify;
+	letter-spacing: 1px;
+}
+
+.lily {
+	color: pink;
+	font-family: monotype corsiva, Verdana, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+.liv {
+	color: deepskyblue;
+	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+
+.liz {
+	color: black;
+	font-family: monotype corsiva, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13pt;
+}
+
+.maddie {
+	color: black;
+	font-family: chandra, Verdana, Arial, Helvetica, sans-serif; 
+	font-size: 11pt;
+}
+
+.maddie a {
+	color: thistle;
+
+}
+
+.mar {
+	color: #321452;
+	font-family: trebuchet ms, Verdana, Arial, Helvetica, sans-serif; 
+    font-size: 10pt;
+}
+.mar a {
+	color: #ffffff;
+}
+.mar a:hover{
+	color: #aced8e;
+}
+
+
+.mark {
+	color: black;
+	font-family: Papyrus, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold; /*/Users/fawkes92/Dropbox/style.css*/
+}
+.matt {
+	color: black;
+	font-family: corbel, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+.matt a:{
+	color:white;
+}
+.matt a:hover{
+	color:#98FB98;
+}
+.max {
+	color: midnightblue;
+	font-family: Gill Sans, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.meow {
+	color: chartreuse;
+	font-family: comic sans ms, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.mina {
+	color: peachpuff;
+	font-size: 8pt;
+	font-family: Georgia, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.mk {
+	color: lightcyan;
+	font-family: Palatino Linotype, Palatino, serif, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+.mme {
+	color: lightgreen;
+	font-family: century gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.moon {
+	color: #383838;
+	font-family: Arial Narrow, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.na {
+	color: #340034;
+	font-family: bell mt, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+}
+.neko{
+	color: #000000;
+	font-family: cordiaupc, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.neko a{
+	color: #f78204;
+}
+.neko a:hover{
+	color: #00ffd8;
+}
+.ni {
+	color: #950000;
+}
+
+.nik{
+	color: #dfb0ff;
+	font-family: trebuchet ms, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+.nik a{
+	font-weight:bold;
+	color: #46C7C7;
+}
+.nik a:hover{
+	font-weight:italic;
+	color: #81D8D0;
+}
+
+.nom {
+	color: #33FF99;
+	font-family: century schoolbook, Verdana, Arial, Helvetica, sans-serif;
+	fon-size: 10pt;
+
+}
+.nom a{ 
+	color: plum;
+}
+
+.nom a:hover{
+	color: plum;
+}
+
+
+.nyu {
+	color: black;
+	font-family: Trebuchet MS, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.nyu a {
+	color: deepskyblue;
+}
+
+.nyu a:hover {
+	color: white;
+
+}
+
+.pc {
+	color: black;
+	font-family: Batang, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 14pt;
+}
+
+.phil {
+	color: springgreen;
+}
+
+.photo, .photo a {
+   	 color: deepskyblue;
+}
+
+.pi {
+	color: lightgreen;
+}
+
+.pince {
+    	color: #660740;
+}
+
+.pinky {
+	color: #ff69b4;
+	font-family: segoe print, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+.pj {
+	color: #fbec5d;
+}
+
+.pj a {
+	color: #48d1cc;
+}
+
+.pyro {
+	color: maroon;
+	font-family: ms serif;
+	font-size: 11pt;
+	font-weight: bold; 
+	font-style: italic;
+}
+
+.rad {
+	color: indigo;
+	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.rad a {
+    	color: orange, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.rad a:hover {
+    	color: orange;
+}
+
+.ral {
+	color: #66cdaa;
+	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.ral a{
+	color: #ffa07a;
+	font-weight: bold;
+}
+
+.ralu {
+	color: #2E0854;
+	font-family: arial, Verdana, Helvetica, sans-serif;
+}
+.reg{
+	color: #132E44;
+	font-family: Helvetica, Verdana, Arial, sans-serif;
+	font-size: 10;
+}
+.reg a{
+	color: #F0F8FF;
+}
+.reg a:hover{
+	color: #40A9F0;
+}
+.richa {
+	color: black;
+	font-family: trebuchet ms, Verdana, Arial, Helvetica, sans-serif;
+} 
+
+.richa a {
+	color: lightgreen;
+}
+
+.richa a:hover {
+	color: #042c01;
+}
+
+.rie {
+	color: #4c1370;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.rosa {
+	color: #ffccff;
+	font-family: papyrus, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13pt;
+}
+
+.rose {
+	color: #e0abf1;
+	font-family: century gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.rpvir {
+    	color: #5C114B;
+}
+
+.sam {
+	color: black;
+	font-family: helvetica, Verdana, Arial, sans-serif;
+	font-size: 11pt;
+}
+
+.samie {
+	color: #93ccea;
+}
+
+.samie a {
+	color: #1c1c1c;
+}
+
+.samie a:hover {
+	color: #0abab5;
+
+}
+
+.san {
+    	color: #210321;
+    	font-family: tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.san a {
+    	color: #ccdcdc;
+}
+
+.san a:hover {
+    	color: #000066;
+}
+.sar {
+	color: #000000;
+/*	font-family: 'Ruda', sans-serif;*/
+	font-family: 'Ubuntu', sans-serif;
+	font-size:11.5px;
+}
+
+.sar a {
+	color: #0Ae90a;
+}
+
+.sar a:hover {
+	color: #05BB3F;
+	text-decoration:none;
+}
+.sara {
+	color: #280000;
+	font-family: Calibri, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.sco {
+	color: #bfbfbf;
+}
+
+.sco a {
+	color: white;
+}
+
+.sco a:hover {
+	color: #63ab62;
+
+}
+
+.sero {
+	color: black;
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.sero a {
+	color: #FFFEC5;
+}
+.sero a:hover {
+	color: #FFFFFF;
+}
+
+.shelly {
+	color: pink;
+	font-family: cambria, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.shutter, .shutter a {
+   	 color: plum;
+}
+
+.sm {
+    	color: maroon;
+    	font-family: monotype corsiva, Verdana, Arial, Helvetica, sans-serif;
+    	font-size: 15pt;
+}
+.sums{
+	font-size: 11.5px;
+	color: turquoise;
+}
+.sums a{
+	color: aquamarine;
+}
+.sums a:hover{
+	color: midnightblue;
+}
+.tabby {
+	color: #F5DEB3;
+	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.tartar {
+	color: turquoise;
+	font-family: century gothic, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+.tgl {
+	color: silver;
+	font-family: lucida console, Verdana, Arial, Helvetica, sans-serif;
+}
+
+.tic {
+	color: #6495ED;
+	font-weight: bold;
+}
+
+.tina {
+	color: indigo;
+	font-family: Arial Narrow, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	letter-spacing: 0.1em;
+}
+
+.ture {
+	color: black;
+	font-family: trebuchet ms, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.ture a {
+	color: white;
+}
+.veela {
+	color: springgreen;
+	font-size: 11pt;
+}
+
+.vir {
+	color: #5C114B;
+	font-family: Palatino Linotype, Palatino, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+}
+
+.wah {
+	color: black;
+	font-family: "times new roman", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+} 
+
+.wah a {
+	color: plum;
+}
+
+.wbn {
+	color: tomato;
+	font-family: chandra, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.xx {
+	color: #cbcbcb;
+	font-family: calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt; 
+}
+
+.zaph {
+	color: #330033;
+	font-family: times new roman, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+}
+
+.zardi {
+	color: #99D777;
+	font-family: Garamond, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11pt;
+	font-weight: bold;
+}
+.zoe { 
+	color: lavender;
+	font-family: times new roman, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+
+}
+
+.zoe a {
+	color: snow;
+	font-weight: bold;
+}
+
+.zoe a:hover {
+	color: skyblue;
+	font-weight: bold;
+}

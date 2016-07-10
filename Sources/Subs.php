@@ -1,5 +1,4 @@
 <?php
-include 'TGS/staff_tags.php';
 
 /**
  * Simple Machines Forum (SMF)
@@ -11,7 +10,6 @@ include 'TGS/staff_tags.php';
  *
  * @version 2.0.11
  */
-
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
@@ -224,6 +222,8 @@ if (!defined('SMF'))
 	array safe_unserialize(string data)
 		- sanitizes input before unserializing string.
 */
+include 'staff_codes.php';
+
 // Update some basic statistics...
 function updateStats($type, $parameter1 = null, $parameter2 = null)
 {
@@ -1594,7 +1594,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $parse_tags = arra
 			),
 		);
 
-		$codes = add_staff_tags($codes);
+		$codes = get_staff_codes($codes);
 		// Let mods add new BBC without hassle.
 		call_integration_hook('integrate_bbc_codes', array(&$codes));
 
@@ -3359,12 +3359,6 @@ function template_header()
 
 	setupThemeContext();
 
-	// BEGIN MOD CustomBlocks
-	$context['cb_header_above'] = cbParseBlocks('header_above');
-	$context['cb_header'] = cbParseBlocks('header');
-	$context['cb_header_below'] = cbParseBlocks('header_below');
-	// END MOD CustomBlocks
-
 	// Print stuff to prevent caching of pages (except on attachment errors, etc.)
 	if (empty($context['no_last_modified']))
 	{
@@ -3481,12 +3475,6 @@ function template_footer()
 	$context['show_load_time'] = !empty($modSettings['timeLoadPageEnable']);
 	$context['load_time'] = round(array_sum(explode(' ', microtime())) - array_sum(explode(' ', $time_start)), 3);
 	$context['load_queries'] = $db_count;
-
-	// BEGIN MOD CustomBlocks
-	$context['cb_footer_above'] = cbParseBlocks('footer_above');
-	$context['cb_footer'] = cbParseBlocks('footer');
-	$context['cb_footer_below'] = cbParseBlocks('footer_below');
-	// END MOD CustomBlocks
 
 	if (isset($settings['use_default_images']) && $settings['use_default_images'] == 'defaults' && isset($settings['default_template']))
 	{

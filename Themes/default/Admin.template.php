@@ -772,7 +772,7 @@ function template_show_settings()
 
 	echo '
 	<div id="admincenter">
-		<form action="', $context['post_url'], '"' . (isset($context['CBBC_multipart']) ? ' enctype="multipart/form-data"' : '') . ' method="post" accept-charset="', $context['character_set'], '"', !empty($context['force_form_onsubmit']) ? ' onsubmit="' . $context['force_form_onsubmit'] . '"' : '', '>';
+		<form action="', $context['post_url'], '" method="post" accept-charset="', $context['character_set'], '"', !empty($context['force_form_onsubmit']) ? ' onsubmit="' . $context['force_form_onsubmit'] . '"' : '', '>';
 
 	// Is there a custom title?
 	if (isset($context['settings_title']))

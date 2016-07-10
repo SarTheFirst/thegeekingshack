@@ -728,10 +728,6 @@ function Credits($in_admin = false)
 				$txt['some_mod_copyright'],
 		*/
 		'mods' => array(
-			// BEGIN MOD CustomBlocks
-			'<a href="http://custom.simplemachines.org/mods/index.php?mod=3703" target="_blank" class="new_win">Custom blocks</a>, 2.4 &copy; 2013-2015, davidhs',
-			// END MOD CustomBlocks
-
 		),
 	);
 
