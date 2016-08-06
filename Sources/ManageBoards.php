@@ -399,6 +399,7 @@ function EditBoard()
 			'id' => 0,
 			'name' => $txt['mboards_new_board_name'],
 			'description' => '',
+			'global_topics' => 0,
 			'count_posts' => 1,
 			'posts' => 0,
 			'topics' => 0,
@@ -593,6 +594,7 @@ function EditBoard2()
 		}
 
 		// Checkboxes....
+		$boardOptions['global_topics'] = isset($_POST['global_topics']);
 		$boardOptions['posts_count'] = isset($_POST['count']);
 		$boardOptions['override_theme'] = isset($_POST['override_theme']);
 		$boardOptions['board_theme'] = (int) $_POST['boardtheme'];

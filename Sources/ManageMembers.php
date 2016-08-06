@@ -1303,5 +1303,380 @@ function jeffsdatediff($old)
 	// Divide out the seconds in a day to get the number of days.
 	return ceil($dis / (24 * 60 * 60));
 }
+function ManageSubAccounts($return_config = false)
+{
+	global $context, $txt, $sourcedir;
+
+	$subActions = array(
+		'settings' => 'ModifySubAccountSettings',
+		'view' => 'ViewSubAccounts',
+	);
+
+	// Needed for the inline permission functions, and the settings template.
+	require_once($sourcedir .'/ManageSettings.php');
+
+	loadGeneralSettingParameters($subActions, 'settings');
+
+	// Load up all the tabs...
+	$context[$context['admin_menu_name']]['tab_data'] = array(
+		'title' => &$txt['managesubaccounts'],
+		'help' => '',
+		'description' => $txt['managesubaccounts_information'],
+		'tabs' => array(
+			'settings' => array(
+			),
+			'view' => array(
+				'label' => $txt['subaccount_view_all'],
+			),
+		),
+	);
+
+	// Call the right function for this sub-acton.
+	$subActions[$_REQUEST['sa']]();
+}
+
+function ModifySubAccountSettings($return_config = false)
+{
+	global $context, $txt, $scripturl, $modSettings, $smcFunc;
+
+	// Set the current sub action.
+	$context['sub_action'] = $_REQUEST['sa'];
+
+	$config_vars = array(
+		// Is it even enabled??
+		array('check', 'enableSubAccounts'),
+	);
+
+	if (!empty($modSettings['enableSubAccounts']))
+		$config_vars = array_merge($config_vars, array(
+			'',
+			// General Settings
+			array('check', 'subaccountsInheritParentGroup'),
+			array('check', 'subaccountsShowInMemberlist'),
+			array('check', 'subaccountsShowInProfile'),
+			array('select', 'subaccountsEnablePortalBlock', array('none' => $txt['subaccount_no_portal'], 'sp' => 'SimplePortal 2.x', 'ez' => 'ezPortal 0.2.x' , 'pmx' => 'PortaMx 0.9xx'), 'disabled' => true),
+			// Membergroup settings
+			array('title', 'subaccount_configure_groups'),
+			array('desc', 'subaccount_configure_groups_desc'),
+				array('callback', 'subaccount_group_settings'),
+		));
+
+	if ($return_config)
+		return $config_vars;
+
+	loadLanguage('ManageMembers');
+
+	// Get the membergroups that we can set counts on
+	$context['membergroup_counts'] = array();
+	$request = $smcFunc['db_query']('', '
+		SELECT id_group, group_name
+		FROM {db_prefix}membergroups
+		WHERE min_posts = {int:min_posts}
+			AND id_group != {int:mod_group}',
+		array(
+			'min_posts' => -1,
+			'mod_group' => 3,
+		)
+	);
+	$context['membergroup_counts'][] = array(
+		'id' => 0,
+		'name' => $txt['membergroups_members'],
+		'count' => !empty($modSettings['subaccount_max_group_0']) ? $modSettings['subaccount_max_group_0'] : 0,
+		'disabled' => false,
+	);
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$context['membergroup_counts'][] = array(
+			'id' => $row['id_group'],
+			'name' => $row['group_name'],
+			'count' => !empty($modSettings['subaccount_max_group_' . $row['id_group']]) ? $modSettings['subaccount_max_group_' . $row['id_group']] : 0,
+			'disabled' => $row['id_group'] == 1,
+		);
+	$smcFunc['db_free_result']($request);
+
+	// Get setup for the page
+	$context['page_title'] = $txt['managesubaccounts'];
+	$context['post_url'] = $scripturl . '?action=admin;area=subaccounts;sa=settings;save';
+	$context['settings_title'] = $txt['managesubaccounts'];
+
+	// Saving?
+	if (isset($_GET['save']))
+	{
+		checkSession();
+		$save_vars = $config_vars;
+		saveDBSettings($save_vars);
+
+		if (!empty($_POST['membergroup_count']) && is_array($_POST['membergroup_count']))
+		{
+			$changeArray = array();
+			foreach ($_POST['membergroup_count'] as $id => $count)
+				$changeArray['subaccount_max_group_' . (int) $id] = (int) $count;
+
+			updateSettings($changeArray);
+		}
+
+		redirectexit('action=admin;area=subaccounts;sa=settings');
+	}
+
+	prepareDBSettingContext($config_vars);
+
+}
+
+function ViewSubAccounts()
+{
+	global $context, $smcFunc, $txt, $modSettings, $sourcedir, $scripturl;
+
+	// Set the current sub action.
+	$context['sub_action'] = $_REQUEST['sa'];
+	$context['page_title'] = $txt['managesubaccounts'];
+
+	$listOptions = array(
+		'id' => 'member_list',
+		'items_per_page' => $modSettings['defaultMaxMembers'],
+		'base_href' => $scripturl . '?action=admin;area=subaccounts;sa=view',
+		'default_sort_col' => 'id_member',
+		'get_items' => array(
+			'function' => 'list_getSubaccounts',
+		),
+		'get_count' => array(
+			'function' => 'list_getNumSubaccounts',
+		),
+		'columns' => array(
+			'id_member' => array(
+				'header' => array(
+					'value' => $txt['member_id'],
+				),
+				'data' => array(
+					'db' => 'id_subaccount',
+					'class' => 'windowbg',
+					'style' => 'text-align: center;',
+				),
+				'sort' => array(
+					'default' => 'id_subaccount',
+					'reverse' => 'id_subaccount DESC',
+				),
+			),
+			'subaccount' => array(
+				'header' => array(
+					'value' => $txt['subaccount'],
+				),
+				'data' => array(
+					'sprintf' => array(
+						'format' => '<a href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=%1$d">%2$s</a>',
+						'params' => array(
+							'id_subaccount' => false,
+							'real_name_subaccount' => false,
+						),
+					),
+				),
+				'sort' => array(
+					'default' => 'real_name_subaccount',
+					'reverse' => 'real_name_subaccount DESC',
+				),
+			),
+			'parent_name' => array(
+				'header' => array(
+					'value' => $txt['parent_account'],
+				),
+				'data' => array(
+					'sprintf' => array(
+						'format' => '<a href="' . strtr($scripturl, array('%' => '%%')) . '?action=profile;u=%1$d">%2$s</a>',
+						'params' => array(
+							'id_parent' => false,
+							'real_name_parent' => false,
+						),
+					),
+				),
+				'sort' => array(
+					'default' => 'real_name_parent',
+					'reverse' => 'real_name_parent DESC',
+				),
+			),
+			'shared' => array(
+				'header' => array(
+					'value' => $txt['shared'],
+				),
+				'data' => array(
+					'function' => create_function('$rowData', '
+						global $txt;
+
+						return !empty($rowData[\'is_shareable\']) ? $txt[\'yes\'] : $txt[\'no\'];
+					'),
+					'style' => 'text-align: center;',
+				),
+				'sort' => array(
+					'default' => 'real_name_parent',
+					'reverse' => 'real_name_parent DESC',
+				),
+			),
+			'last_active' => array(
+				'header' => array(
+					'value' => $txt['viewmembers_online'],
+				),
+				'data' => array(
+					'function' => create_function('$rowData', '
+						global $txt;
+
+						// Calculate number of days since last online.
+						if (empty($rowData[\'last_login\']))
+							$difference = $txt[\'never\'];
+						else
+						{
+							$num_days_difference = jeffsdatediff($rowData[\'last_login\']);
+
+							// Today.
+							if (empty($num_days_difference))
+								$difference = $txt[\'viewmembers_today\'];
+
+							// Yesterday.
+							elseif ($num_days_difference == 1)
+								$difference = sprintf(\'1 %1$s\', $txt[\'viewmembers_day_ago\']);
+
+							// X days ago.
+							else
+								$difference = sprintf(\'%1$d %2$s\', $num_days_difference, $txt[\'viewmembers_days_ago\']);
+						}
+
+						return $difference;
+					'),
+					'style' => 'text-align: center;',
+				),
+				'sort' =>  array(
+					'default' => 'last_login DESC',
+					'reverse' => 'last_login',
+				),
+			),
+			'created' => array(
+				'header' => array(
+					'value' => $txt['account_created'],
+				),
+				'data' => array(
+					'function' => create_function('$rowData', '
+						global $txt;
+
+						// Calculate number of days since last online.
+						if (empty($rowData[\'date_registered\']))
+							$difference = $txt[\'never\'];
+						else
+						{
+							$num_days_difference = jeffsdatediff($rowData[\'date_registered\']);
+
+							// Today.
+							if (empty($num_days_difference))
+								$difference = $txt[\'viewmembers_today\'];
+
+							// Yesterday.
+							elseif ($num_days_difference == 1)
+								$difference = sprintf(\'1 %1$s\', $txt[\'viewmembers_day_ago\']);
+
+							// X days ago.
+							else
+								$difference = sprintf(\'%1$d %2$s\', $num_days_difference, $txt[\'viewmembers_days_ago\']);
+						}
+
+						return $difference;
+					'),
+					'style' => 'text-align: center;',
+				),
+				'sort' =>  array(
+					'default' => 'date_registered DESC',
+					'reverse' => 'date_registered',
+				),
+			),
+			'posts' => array(
+				'header' => array(
+					'value' => $txt['member_postcount'],
+				),
+				'data' => array(
+					'db' => 'posts',
+					'style' => 'text-align: center;',
+				),
+				'sort' =>  array(
+					'default' => 'posts',
+					'reverse' => 'posts DESC',
+				),
+			),
+			'check' => array(
+				'header' => array(
+					'value' => '<input type="checkbox" onclick="invertAll(this, this.form);" class="check" />',
+				),
+				'data' => array(
+					'function' => create_function('$rowData', '
+						global $user_info;
+
+						return \'<input type="checkbox" name="delete[]" value="\' . $rowData[\'id_subaccount\'] . \'" class="check" \' . ($rowData[\'id_subaccount\'] == $user_info[\'id\'] ? \'disabled="disabled"\' : \'\') . \' />\';
+					'),
+					'class' => 'windowbg',
+					'style' => 'text-align: center',
+				),
+			),
+		),
+		'form' => array(
+			'href' => $scripturl . '?action=admin;area=subaccounts;sa=view',
+			'include_start' => true,
+			'include_sort' => true,
+		),
+		'additional_rows' => array(
+			array(
+				'position' => 'below_table_data',
+				'value' => '<input type="submit" name="delete_members" value="' . $txt['admin_delete_members'] . '" onclick="return confirm(\'' . $txt['confirm_delete_members'] . '\');" />',
+				'class' => 'titlebg',
+				'style' => 'text-align: right;',
+			),
+		),
+	);
+
+	// Without not enough permissions, don't show 'delete members' checkboxes.
+	//if (!allowedTo('profile_remove_any'))
+		unset($listOptions['columns']['check'], $listOptions['form'], $listOptions['additional_rows']);
+
+	require_once($sourcedir . '/Subs-List.php');
+	createList($listOptions);
+
+	$context['sub_template'] = 'show_list';
+	$context['default_list'] = 'member_list';
+}
+
+function list_getSubaccounts($start, $items_per_page, $sort)
+{
+	global $smcFunc;
+
+	$request = $smcFunc['db_query']('', '
+		SELECT
+			mem.id_member AS id_subaccount, mem2.id_member AS id_parent, mem.real_name AS real_name_subaccount, mem2.real_name AS real_name_parent, mem.last_login,
+			mem.posts, mem.date_registered, mem.is_shareable
+		FROM {db_prefix}subaccounts AS sub
+			LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = sub.id_member)
+			LEFT JOIN {db_prefix}members AS mem2 ON (mem2.id_member = sub.id_parent)
+		ORDER BY {raw:sort}
+		LIMIT {int:start}, {int:per_page}',
+		array(
+			'sort' => $sort,
+			'start' => $start,
+			'per_page' => $items_per_page,
+		)
+	);
+
+	$members = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$members[] = $row;
+	$smcFunc['db_free_result']($request);
+
+	return $members;
+}
+
+function list_getNumSubaccounts()
+{
+	global $smcFunc, $modSettings;
+
+	$request = $smcFunc['db_query']('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}subaccounts AS sub',
+		array()
+	);
+	list ($num_members) = $smcFunc['db_fetch_row']($request);
+	$smcFunc['db_free_result']($request);
+
+	return $num_members;
+}
 
 ?>

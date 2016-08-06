@@ -495,6 +495,18 @@ div.pagesection div.floatright input
 	padding: 0.6em 0 0.4em 0;
 }
 
+/* Colors for background of Global Topics */
+.global
+{
+	color: #000000;
+	background-color: #C5E0FF;
+}
+.global2
+{
+	color: #000000;
+	background-color: #C5E0FF;
+}
+
 /* Colors for background of posts requiring approval */
 .approvebg
 {
@@ -2974,6 +2986,51 @@ div#profile_success
 	color: green;
 	background: #efe;
 }
+
+#subaccount_list .subaccount
+{
+	width: 200px;
+	margin: .3em;
+	padding: .5em;
+	float: left;
+}
+
+#subaccount_list ul li
+{
+	line-height: 1em;
+	height: 1em;
+	margin: 2px 0;
+	overflow: hidden;
+	padding: 5px;
+	text-align: center;
+	border: 1px solid #ccc;
+}
+
+#subaccount_list  .name
+{
+	font-size: 1.3em;
+}
+
+#subaccount_list .profile_buttons li, #subaccount_list .action_buttons li, .subaccount_icons li
+{
+	border: none;
+	float: left;
+	margin: 0 .3em;
+	padding: 0;
+	height: 20px;
+}
+
+.subaccount_icons img
+{
+	vertical-align: middle;
+}
+
+#subaccount_list .action_buttons
+{
+	height: 1.5em;
+}
+
+
 
 /* Profile statistics */
 #generalstats div.content dt

@@ -769,6 +769,7 @@ function Post()
 		// Check the boxes that should be checked.
 		$context['use_smileys'] = !empty($row['smileys_enabled']);
 		$context['icon'] = $row['icon'];
+		$context['id_poster'] = $row['id_member'];
 
 		// Show an "approve" box if the user can approve it, and the message isn't approved.
 		if (!$row['approved'] && !$context['show_approval'])
@@ -1198,6 +1199,23 @@ function Post()
 
 	// Register this form in the session variables.
 	checkSubmitOnce('register');
+
+	// Setup the subaccount dropdown box... we'll need to get it for the right user
+	$context['subaccount_list'] = array();
+	if (!empty($user_info['subaccounts']) && ($context['is_new_post'] || (!empty($context['id_poster']) && (array_key_exists($context['id_poster'], $user_info['subaccounts']) || $context['id_poster'] == $user_info['id']))))
+	{
+		$context['subaccount_list'][$user_info['id']] = array(
+			'id' => $user_info['id'],
+			'name' => $user_info['name'],
+		);
+		foreach ($user_info['subaccounts'] as $account)
+			$context['subaccount_list'][$account['id']] = array(
+				'id' => $account['id'],
+				'name' => $account['name'],
+			);
+		$selected = !empty($_POST['subaccount']) && !empty($context['subaccount_list'][$_POST['subaccount']]) ? $_POST['subaccount'] : (!empty($context['id_poster']) && !empty($context['subaccount_list'][$context['id_poster']]) ? $context['id_poster'] : $user_info['id']);
+		$context['subaccount_list'][$selected]['selected'] = true;
+	}
 
 	// Finally, load the template.
 	if (WIRELESS && WIRELESS_PROTOCOL != 'wap')
@@ -1866,6 +1884,14 @@ function Post2()
 
 	$_POST['icon'] = !empty($attachIDs) && $_POST['icon'] == 'xx' ? 'clip' : $_POST['icon'];
 
+	// Modifying a message and there's a subaccount here
+	if (isset($_POST['subaccount']))
+		$_POST['subaccount'] = (int) $_POST['subaccount'];
+
+	// If the original poster is not one of the subaccounts here, or if the subaccount is not one of the users, destroy it
+	if (isset($_POST['subaccount']) && ((!empty($_REQUEST['msg']) && $row['id_member'] != $user_info['id'] && !array_key_exists($row['id_member'], $user_info['subaccounts'])) || ($_POST['subaccount'] != $user_info['id'] && !array_key_exists($_POST['subaccount'], $user_info['subaccounts']))))
+		unset($_POST['subaccount']);
+
 	// Collect all parameters for the creation or modification of a post.
 	$msgOptions = array(
 		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],
@@ -1886,8 +1912,8 @@ function Post2()
 		'is_approved' => !$modSettings['postmod_active'] || empty($topic) || !empty($board_info['cur_topic_approved']),
 	);
 	$posterOptions = array(
-		'id' => $user_info['id'],
-		'name' => $_POST['guestname'],
+		'id' => isset($_POST['subaccount']) ? $_POST['subaccount'] : (isset($row['id_member']) ? $row['id_member'] : $user_info['id']),
+		'name' => isset($_POST['subaccount']) && $_POST['subaccount'] != $user_info['id'] ? $user_info['subaccounts'][$_POST['subaccount']]['name'] : $_POST['guestname'],
 		'email' => $_POST['email'],
 		'update_post_count' => !$user_info['is_guest'] && !isset($_REQUEST['msg']) && $board_info['posts_count'],
 	);
@@ -1899,7 +1925,7 @@ function Post2()
 		if (time() - $row['poster_time'] > $modSettings['edit_wait_time'] || $user_info['id'] != $row['id_member'])
 		{
 			$msgOptions['modify_time'] = time();
-			$msgOptions['modify_name'] = $user_info['name'];
+			$msgOptions['modify_name'] = isset($_POST['subaccount']) && $_POST['subaccount'] != $user_info['id'] ? $user_info['subaccounts'][$_POST['subaccount']]['name'] : $user_info['name'];
 		}
 
 		// This will save some time...
@@ -1907,6 +1933,13 @@ function Post2()
 			unset($msgOptions['approved']);
 
 		modifyPost($msgOptions, $topicOptions, $posterOptions);
+
+		// Okay, the message was modified, should we update post counts?
+		if (isset($_POST['subaccount']) && $row['id_member'] != $_POST['subaccount'])
+		{
+			updateMemberData($row['id_member'], array('posts' => '-'));
+			updateMemberData($_POST['subaccount'], array('posts' => '+'));
+		}
 	}
 	// This is a new topic or an already existing one. Save it.
 	else

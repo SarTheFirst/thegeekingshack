@@ -74,7 +74,7 @@ function template_main()
 		{
 			echo '
 				<tr ', empty($member['sort_letter']) ? '' : ' id="letter' . $member['sort_letter'] . '"', '>
-					<td class="windowbg2">
+					<td ', !empty($member['subaccounts']) && !empty($context['subaccounts_online']) ? 'rowspan="2" ' : '', 'class="windowbg2">
 						', $context['can_send_pm'] ? '<a href="' . $member['online']['href'] . '" title="' . $member['online']['text'] . '">' : '', $settings['use_image_buttons'] ? '<img src="' . $member['online']['image_href'] . '" alt="' . $member['online']['text'] . '" align="middle" />' : $member['online']['label'], $context['can_send_pm'] ? '</a>' : '', '
 					</td>
 					<td class="windowbg lefttext">', $member['link'], '</td>
@@ -127,6 +127,18 @@ function template_main()
 
 		echo '
 				</tr>';
+
+			if (!empty($member['subaccounts']) && !empty($context['subaccounts_online']))
+			{
+				$subaccountString = '';
+				foreach($member['subaccounts'] as $account)
+					$subaccountString .= ', <img style="margin-bottom: -2px;" src="' . $context['subaccounts_online'][$account['id']] . '" />&nbsp;<a href="' . $scripturl . '?action=profile;u=' . $account['id'] . '">' . $account['name'] . '</a>';
+				$subaccountString = substr($subaccountString,2);
+				echo '
+			<tr>
+				<td align="left" class="windowbg2" colspan="', $context['colspan'], '"><div class="smalltext align_left">', $txt['subaccounts'], ': ', $subaccountString, '</div></td>
+			</tr>';
+			}
 		}
 	}
 	// No members?

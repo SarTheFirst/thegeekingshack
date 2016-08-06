@@ -223,10 +223,11 @@ function Login2()
 
 	// Load the data up!
 	$request = $smcFunc['db_query']('', '
-		SELECT passwd, id_member, id_group, lngfile, is_activated, email_address, additional_groups, member_name, password_salt,
-			openid_uri, passwd_flood
-		FROM {db_prefix}members
-		WHERE ' . ($smcFunc['db_case_sensitive'] ? 'LOWER(member_name) = LOWER({string:user_name})' : 'member_name = {string:user_name}') . '
+		SELECT mem.passwd, mem.id_member, mem.id_group, mem.lngfile, mem.is_activated, mem.email_address, mem.additional_groups, mem.member_name, mem.password_salt,
+			mem.openid_uri, mem.passwd_flood, IFNULL(sub.id_parent, 0) AS id_parent
+		FROM {db_prefix}members AS mem
+			LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+		WHERE ' . ($smcFunc['db_case_sensitive'] ? 'LOWER(mem.member_name) = LOWER({string:user_name})' : 'mem.member_name = {string:user_name}') . '
 		LIMIT 1',
 		array(
 			'user_name' => $smcFunc['db_case_sensitive'] ? strtolower($_POST['user']) : $_POST['user'],
@@ -238,10 +239,11 @@ function Login2()
 		$smcFunc['db_free_result']($request);
 
 		$request = $smcFunc['db_query']('', '
-			SELECT passwd, id_member, id_group, lngfile, is_activated, email_address, additional_groups, member_name, password_salt, openid_uri,
-			passwd_flood
-			FROM {db_prefix}members
-			WHERE email_address = {string:user_name}
+			SELECT mem.passwd, mem.id_member, mem.id_group, mem.lngfile, mem.is_activated, mem.email_address, mem.additional_groups, mem.member_name, mem.password_salt,
+				mem.openid_uri, mem.passwd_flood, IFNULL(sub.id_parent, 0) AS id_parent
+			FROM {db_prefix}members AS mem
+				LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+			WHERE mem.email_address = {string:user_name}
 			LIMIT 1',
 			array(
 				'user_name' => $_POST['user'],
@@ -257,6 +259,13 @@ function Login2()
 
 	$user_settings = $smcFunc['db_fetch_assoc']($request);
 	$smcFunc['db_free_result']($request);
+
+	// SubAccount?
+	if (!empty($user_settings['id_parent']))
+	{
+		$context['login_errors'] = array($txt['no_subaccount_login']);
+		return;
+	}
 
 	// Figure out the password using SMF's encryption - if what they typed is right.
 	if (isset($_POST['hash_passwrd']) && strlen($_POST['hash_passwrd']) == 40)

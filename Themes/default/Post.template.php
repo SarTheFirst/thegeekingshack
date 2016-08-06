@@ -193,6 +193,20 @@ function template_main()
 						</dd>';
 	}
 
+	if (!empty($context['subaccount_list']))
+	{
+		echo '
+						<dt>', $txt['use_subaccount'], ':</dt>
+						<dd>
+							<select name="subaccount">';
+		foreach($context['subaccount_list'] as $subaccount)
+			echo '
+								<option value="', $subaccount['id'], '" ', !empty($subaccount['selected']) ? 'selected="selected"' : '', '>', $subaccount['name'], '</option>';
+		echo '
+							</select>
+						</dd>';
+	}
+
 	// Now show the subject box for this post.
 	echo '
 						<dt>

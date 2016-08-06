@@ -30,11 +30,13 @@ if (!defined('SMF'))
 function ModifyProfile($post_errors = array())
 {
 	global $txt, $scripturl, $user_info, $context, $sourcedir, $user_profile, $cur_profile;
-	global $modSettings, $memberContext, $profile_vars, $smcFunc, $post_errors, $options, $user_settings;
+	global $modSettings, $memberContext, $profile_vars, $smcFunc, $post_errors, $options, $user_settings, $settings;
 
 	// Don't reload this as we may have processed error strings.
 	if (empty($post_errors))
 		loadLanguage('Profile');
+	loadLanguage('UltimateProfile');
+
 	loadTemplate('Profile');
 
 	require_once($sourcedir . '/Subs-Menu.php');
@@ -106,7 +108,28 @@ function ModifyProfile($post_errors = array())
 						'any' => 'profile_view_any',
 					),
 				),
-				'showposts' => array(
+				'pictures' => array(
+					'label' => $txt['profile_pictures_show'],
+					'file' => 'Profile-Pictures.php',
+					'function' => 'pictures',
+					'enabled' => ($modSettings['profile_enable_pictures'] == 1),
+					'sc' => 'post',
+					'permission' => array(
+						'own' => 'profile_view_own',
+						'any' => 'profile_view_any',
+					),
+				),
+				'buddies' => array(
+					'label' => $txt['profile_buddies_show'],
+					'file' => 'Profile-View.php',
+					'function' => 'buddies',
+					'enabled' => (!empty($modSettings['enable_buddylist']) && $modSettings['enable_buddylist'] == 1),
+					'permission' => array(
+						'own' => array('profile_view_own'),
+						'any' => array('profile_view_any'),
+					),
+				),
+								'showposts' => array(
 					'label' => $txt['showPosts'],
 					'file' => 'Profile-View.php',
 					'function' => 'showPosts',
@@ -164,7 +187,7 @@ function ModifyProfile($post_errors = array())
 					'function' => 'account',
 					'enabled' => $context['user']['is_admin'] || ($cur_profile['id_group'] != 1 && !in_array(1, explode(',', $cur_profile['additional_groups']))),
 					'sc' => 'post',
-					'password' => true,
+					'password' => empty($cur_profile['id_parent']) ? true : false,
 					'permission' => array(
 						'own' => array('profile_identity_any', 'profile_identity_own', 'manage_membergroups'),
 						'any' => array('profile_identity_any', 'manage_membergroups'),
@@ -180,6 +203,16 @@ function ModifyProfile($post_errors = array())
 						'any' => array('profile_extra_any', 'profile_title_any'),
 					),
 				),
+				'customized' => array(
+					'label' => $txt['profile_customized'],
+					'file' => 'Profile-Modify.php',
+					'function' => 'customized',
+					'sc' => 'post',
+					'permission' => array(
+						'own' => array('edit_ultimate_profile_own', 'edit_ultimate_profile_any'),
+						'any' => array('edit_ultimate_profile_any'),
+					),
+				),
 				'theme' => array(
 					'label' => $txt['theme'],
 					'file' => 'Profile-Modify.php',
@@ -188,6 +221,17 @@ function ModifyProfile($post_errors = array())
 					'permission' => array(
 						'own' => array('profile_extra_any', 'profile_extra_own'),
 						'any' => array('profile_extra_any'),
+					),
+				),
+				'managesubaccounts' => array(
+					'label' => $txt['managesubaccounts'],
+					'file' => 'Profile-Modify.php',
+					'function' => 'manageSubAccounts',
+					'enabled' => empty($cur_profile['id_parent']) && !empty($modSettings['enableSubAccounts']),
+					'sc' => 'post',
+					'permission' => array (
+						'own' => array('subaccounts_create_own', 'subaccounts_delete_own', 'subaccounts_merge_own', 'subaccounts_split_own', 'subaccounts_create_any', 'subaccounts_delete_any', 'subaccounts_merge_any', 'subaccounts_split_any'),
+						'any' => array('subaccounts_create_any', 'subaccounts_delete_any', 'subaccounts_merge_any', 'subaccounts_split_any'),
 					),
 				),
 				'authentication' => array(
@@ -273,6 +317,24 @@ function ModifyProfile($post_errors = array())
 					'permission' => array(
 						'own' => array(),
 						'any' => array('pm_send'),
+					),
+				),
+				'comment' => array(
+					'file' => 'Profile-Actions.php',
+					'function' => 'comment',
+					'sc' => 'post',
+					'permission' => array(
+						'own' => 'profile_view_own',
+						'any' => 'profile_view_any',
+					),
+				),
+				'report' => array(
+					'file' => 'Profile-Actions.php',
+					'function' => 'report',
+					'sc' => 'post',
+					'permission' => array(
+						'own' => array(),
+						'any' => 'profile_view_any',
 					),
 				),
 				'issuewarning' => array(
@@ -610,6 +672,10 @@ function ModifyProfile($post_errors = array())
 				);
 			}
 
+			// If the email changed and this is account has subaccounts, we need to update those emails too
+			if (!empty($profile_vars['email_address']) && !empty($cur_profile['subaccounts']))
+				updateMemberData(array_keys($cur_profile['subaccounts']), array('email_address' => $profile_vars['email_address']));
+
 			// Have we got any post save functions to execute?
 			if (!empty($context['profile_execute_on_save']))
 				foreach ($context['profile_execute_on_save'] as $saveFunc)
@@ -642,6 +708,26 @@ function ModifyProfile($post_errors = array())
 	// Set the page title if it's not already set...
 	if (!isset($context['page_title']))
 		$context['page_title'] = $txt['profile'] . (isset($txt[$current_area]) ? ' - ' . $txt[$current_area] : '');
+
+	// Build the link tree.
+	if (!empty($cur_profile['id_parent']))
+	{
+		if (empty($cur_profile['is_shareable']))
+		{
+			loadMemberData(array($cur_profile['id_parent']), false, 'minimal');
+
+			$context['linktree'][] = array(
+				'url' => $scripturl . '?action=profile;u=' . $cur_profile['id_parent'],
+				'name' => $user_profile[$cur_profile['id_parent']]['real_name'],
+			);
+		}
+
+		$context['linktree'][] = array(
+			'url' => $scripturl . '?action=profile;u=' . $cur_profile['id_member'],
+			'name' => $cur_profile['real_name'],
+			'extra_before' => $txt['subaccount'] . ': ',
+		);
+	}
 }
 
 // Load any custom fields for this area... no area means load all, 'summary' loads all public ones.
@@ -764,6 +850,40 @@ function loadCustomFields($memID, $area = 'summary')
 		);
 	}
 	$smcFunc['db_free_result']($request);
+}
+
+
+function get_extension($filename)
+{
+	return substr(strrchr($filename, '.'), 1);
+}
+
+function is_buddy($memID, $buddyID)
+{
+	global $smcFunc, $buddy_list, $modSettings;
+	
+	// When buddy list if off, everybody is your friend ;)
+	if (!isset($modSettings['enable_buddylist']) || $modSettings['enable_buddylist'] == '0')
+		return true;
+	
+	if (!is_array($buddy_list)) {
+		$request = $smcFunc['db_query']('', '
+			SELECT buddy_list 
+			FROM {db_prefix}members 
+			WHERE id_member = {int:id_member}',
+			array(
+				'id_member' => $memID,
+			)
+		);
+		list($buddy_list) = $smcFunc['db_fetch_row']($request);
+		
+		$buddy_list = explode(',', $buddy_list);
+	}
+	
+	if (in_array($buddyID, $buddy_list))
+		return true;
+	else
+		return false;
 }
 
 ?>

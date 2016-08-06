@@ -90,11 +90,11 @@ function template_summary()
 				', !isset($context['disabled_fields']['yim']) && !empty($context['member']['yim']['link']) ? '<li>' . $context['member']['yim']['link'] . '</li>' : '', '
 			</ul>
 			<span id="userstatus">', $context['can_send_pm'] ? '<a href="' . $context['member']['online']['href'] . '" title="' . $context['member']['online']['label'] . '" rel="nofollow">' : '', $settings['use_image_buttons'] ? '<img src="' . $context['member']['online']['image_href'] . '" alt="' . $context['member']['online']['text'] . '" align="middle" />' : $context['member']['online']['text'], $context['can_send_pm'] ? '</a>' : '', $settings['use_image_buttons'] ? '<span class="smalltext"> ' . $context['member']['online']['text'] . '</span>' : '';
-
+	
 	// Can they add this member as a buddy?
 	if (!empty($context['can_have_buddy']) && !$context['user']['is_owner'])
 		echo '
-				<br /><a href="', $scripturl, '?action=buddy;u=', $context['id_member'], ';', $context['session_var'], '=', $context['session_id'], '">[', $txt['buddy_' . ($context['member']['is_buddy'] ? 'remove' : 'add')], ']</a>';
+				<br /><a href="', $scripturl, '?action=buddies;sa=add;u=', $context['member']['id'], ';', $context['session_var'], '=', $context['session_id'], '">[', $txt['buddy_add'], ']</a>';
 
 	echo '
 				</span>';
@@ -127,9 +127,16 @@ function template_summary()
 					<dd>', $context['member']['username'], '</dd>';
 
 	if (!isset($context['disabled_fields']['posts']))
+	{
 		echo '
 					<dt>', $txt['profile_posts'], ': </dt>
 					<dd>', $context['member']['posts'], ' (', $context['member']['posts_per_day'], ' ', $txt['posts_per_day'], ')</dd>';
+
+		if (isset($context['member']['subaccounts_posts']))
+			echo '
+					<dt>', $txt['subaccount_posts'], '</dt>
+					<dd>', $context['member']['subaccounts_posts'], ' (', $context['member']['subaccounts_posts_per_day'], ' ', $txt['posts_per_day'], ')</dd>';
+	}
 
 	// Only show the email address fully if it's not hidden - and we reveal the email.
 	if ($context['member']['show_email'] == 'yes')
@@ -177,6 +184,12 @@ function template_summary()
 		echo '
 					<dt>', $txt['location'], ':</dt>
 					<dd>', $context['member']['location'], '</dd>';
+
+	// This is nasty, but hey, it works...
+	if (!empty($context['member']['subaccounts']) && !empty($modSettings['subaccountsShowInProfile']))
+		echo '
+				<dt>', $txt['subaccounts'], ':</dt>
+				<dd><a href="', $scripturl, '?action=profile;u=', implode('</a>, <a href="' . $scripturl . '?action=profile;u=', array_map(create_function('$id,$account', 'return $id . \'">\' . $account[\'name\'];'), array_keys($context['member']['subaccounts']), $context['member']['subaccounts'])), '</a></dd>';
 
 	echo '
 				</dl>';
@@ -310,6 +323,30 @@ function template_summary()
 	}
 
 	// Show the users signature.
+	
+	
+	// Member Notepad
+	global $scripturl;
+	
+	if ($context['show_pad'])
+	echo '
+			<dl class="noborder">
+					<dt>' . $txt['mempad_title'] . '</dt>
+					<dd>
+						<form method="post" action="', $scripturl, '?action=savepad">
+						  <textarea rows="5" name="txtnotes" cols="50">', $context['pad_notes'], '</textarea><br />
+						  <input type="hidden" name="id" value="', $context['member']['id'], '" />
+						  <input type="submit" value="', $txt['mempad_save'], '" name="cmdnotes" />
+						</form>
+						<br />
+						
+					</dd>
+			</dl>';
+			
+	// End Member Notepad
+	
+	
+
 	if ($context['signature_enabled'] && !empty($context['member']['signature']))
 		echo '
 				<div class="signature">
@@ -2977,6 +3014,282 @@ echo '
 	}
 	updateAuthMethod();
 	// ]]></script>';
+}
+
+
+
+// Template for profile specific options - about me, interests, customization...
+function template_customized()
+{
+	global $context, $settings, $options, $scripturl, $modSettings, $txt;
+
+	// The main containing header.
+	echo '
+		<form action="', $scripturl, '?action=profile;area=customized;save" method="post" accept-charset="', $context['character_set'], '" name="creator" id="creator" enctype="multipart/form-data" onsubmit="return checkProfileSubmit();">
+			<h3 class="catbg">
+				<span class="left"></span>
+				<img src="', $settings['images_url'], '/icons/profile_sm.gif" alt="" class="icon" />
+				', $txt['profile_customized'] , '
+			</h3>
+			<p class="windowbg description">
+				', $txt['profile_customized_info'], '
+			</p>
+			<div class="windowbg2">
+				<span class="topslice"><span></span></span>
+					<div class="content">';
+	
+	if ($modSettings['profile_enable_all'] != 1)
+		echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_customize_enable'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[customized]" value="0" /><input class="input_check" type="checkbox" name="default_options[customized]"', (@$context['member']['options']['customized'] == 1) ? ' checked="checked"' : '', ' value="1"  />
+							</dd>
+						</dl>
+						<hr width="100%" size="1" class="hrcolor" />';
+	
+	echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_customize_private'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[customized_private]" value="0" /><input class="input_check" type="checkbox" name="default_options[customized_private]"', (@$context['member']['options']['customized_private'] == 1) ? ' checked="checked"' : '', ' value="1" />
+							</dd>
+						</dl>
+						<dl>
+							<dt>
+								<strong>', $txt['profile_comments_disable'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[comments_disable]" value="0" /><input class="input_check" type="checkbox" name="default_options[comments_disable]"', (@$context['member']['options']['comments_disable'] == 1) ? ' checked="checked"' : '', ' value="1" />
+							</dd>
+						</dl>
+						<dl>
+							<dt>
+								<strong>', $txt['profile_comments_budd_only'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[comments_budd_only]" value="0" /><input class="input_check" type="checkbox" name="default_options[comments_budd_only]"', (@$context['member']['options']['comments_budd_only'] == 1) ? ' checked="checked"' : '', ' value="1" />
+							</dd>
+						</dl>
+						<dl>
+							<dt>
+								<strong>', $txt['profile_comments_notif_disable'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[comments_notif_disable]" value="0" /><input class="input_check" type="checkbox" name="default_options[comments_notif_disable]"', (@$context['member']['options']['comments_notif_disable'] == 1) ? ' checked="checked"' : '', ' value="1" />
+							</dd>
+						</dl>';
+	if ($modSettings['profile_enable_pictures'] == 1)
+		echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_pictures_budd_only'], '</strong>
+							</dt>
+							<dd>
+								<input type="hidden" name="default_options[pictures_budd_only]" value="0" /><input class="input_check" type="checkbox" name="default_options[pictures_budd_only]"', (@$context['member']['options']['pictures_budd_only'] == 1) ? ' checked="checked"' : '', ' value="1" />
+							</dd>
+						</dl>';
+	
+	if (isset($modSettings['enable_buddylist']) && $modSettings['enable_buddylist'] == '1') {
+		echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_num_buddies_shown'], '</strong>
+							</dt>';
+							
+							$selected = (isset($context['member']['options']['num_shown_buddies'])) ? $context['member']['options']['num_shown_buddies'] : $modSettings['profile_buddies_shown'];
+	
+		echo '
+							<dd>
+								<select name="default_options[num_shown_buddies]">
+									<option value="3"', ($selected == 3) ? ' selected="selected"' : '', '>', $txt['buddy_top3'], '</option>
+									<option value="6"', ($selected == 6) ? ' selected="selected"' : '', '>', $txt['buddy_top6'], '</option>
+									<option value="9"', ($selected == 9) ? ' selected="selected"' : '', '>', $txt['buddy_top9'], '</option>
+									<option value="12"', ($selected == 12) ? ' selected="selected"' : '', '>', $txt['buddy_top12'], '</option>
+								</select>
+							</dd>
+						</dl>';
+	}
+	
+	echo '
+						<hr width="100%" size="1" class="hrcolor" />
+						<dl>
+							<dt>
+								<strong>', $txt['profile_about'], ':</strong>
+								<br />
+								<span class="smalltext">', $txt['profile_about_desc'], '</span>';
+
+	if (!empty($context['show_spellchecking']))
+		echo '
+								<input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'creator\', \'default_options[about]\');" />';
+
+	echo '
+							</dt>
+							<dd>
+								<textarea class="editor" name="default_options[about]" rows="8" cols="65">', @$context['member']['options']['about'], '</textarea><br />';
+
+	// Load the spell checker?
+	if (!empty($context['show_spellchecking']))
+		echo '
+								<script language="JavaScript" type="text/javascript" src="', $settings['default_theme_url'], '/spellcheck.js"></script>';
+
+		echo '				</dd>
+						</dl>';
+	
+	echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_interests'], ':</strong>
+								<br />
+								<span class="smalltext">', $txt['profile_interests_desc'], '</span>';
+
+	if (!empty($context['show_spellchecking']))
+		echo '
+								<input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'creator\', \'default_options[interests]\');" />';
+
+	echo '
+							</dt>
+							<dd>
+								<textarea class="editor" name="default_options[interests]" rows="8" cols="65">', @$context['member']['options']['interests'], '</textarea><br />	
+							</dd>
+						</dl>';
+	
+	if ($modSettings['profile_allow_mediabox'] == 1)
+		echo '
+						<dl>
+							<dt>
+								<strong>', $txt['profile_media'], ':</strong>
+								<br />
+								<span class="smalltext">', $txt['profile_media_desc'], '</span>
+							</dt>
+							<dd>
+								<textarea class="editor" name="default_options[media]" rows="8" cols="65">', @$context['member']['options']['media'], '</textarea><br />
+							</dd>
+						</dl>';
+	
+	if ($modSettings['profile_allow_customize'] == 1)
+		echo '
+						<hr width="100%" size="1" class="hrcolor" />						
+						<dl>
+							<dt>
+								<strong>', $txt['profile_css'], ':</strong>
+								<br />
+								<span class="smalltext">', $txt['profile_css_desc'], '</span>
+							</dt>
+							<dd>
+								<textarea class="editor" name="default_options[css]" rows="8" cols="65">', @$context['member']['options']['css'], '</textarea><br />
+							</dd>
+						</dl>';
+
+	// Show the standard "Save Settings" profile button.
+	template_profile_save();
+
+	echo '
+					</div>
+				<span class="botslice"><span></span></span>
+			</div>
+			<br />
+		</form>';
+		
+	// Any final spellchecking stuff?
+	if (!empty($context['show_spellchecking']))
+		echo '
+		<form name="spell_form" id="spell_form" method="post" accept-charset="', $context['character_set'], '" target="spellWindow" action="', $scripturl, '?action=spellcheck"><input type="hidden" name="spellstring" value="" /></form>';
+}
+
+function template_report_profile()
+{
+	global $context, $txt, $scripturl;
+
+	echo '
+	<form action="', $scripturl, '?action=profile;u=', $context['member']['id'] ,';area=report" method="post" accept-charset="', $context['character_set'], '">
+		<h3 class="catbg">
+			<span class="left"></span>
+			', $txt['profile_report_text1'], '
+		</h3>
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content">
+				<div style="margin-top: 1ex; margin-bottom: 3ex;" align="left">', $txt['profile_report_text2'], '</div>
+				', $txt['profile_report_text3'], ': <input type="text" name="comment" size="50" />
+				<input type="submit" name="submit" value="', $txt['profile_report_submit'], '" class="input_button"	 />
+			</div>
+			<span class="botslice"><span></span></span>
+		</div>
+		<input type="hidden" name="sc" value="', $context['session_id'], '" />
+	</form>';
+}
+
+function template_add_comment()
+{
+	global $context, $txt, $scripturl;
+
+	echo '
+	<form action="', $scripturl, '?action=profile;u=', $context['member']['id'] ,';area=comment;add" method="post" accept-charset="', $context['character_set'], '">
+		<h3 class="catbg">
+			<span class="left"></span>
+			', $context['member']['name'] ,': ', $txt['profile_comment_add'], '
+		</h3>
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content">
+				', $txt['profile_comment'], ':<br />
+				<textarea class="editor" cols="50" rows="4" name="comment"></textarea><br />
+				<br />
+				<input type="submit" name="submit" value="', $txt['save'], '" class="input_button" />
+			</div>
+		</div>
+		<span class="botslice"><span></span></span>
+		<input type="hidden" name="sc" value="', $context['session_id'], '" />
+	</form>';
+}
+
+function template_buddies()
+{
+	global $context, $settings, $txt, $scripturl;
+	
+	echo '
+	<h3 class="catbg">
+		<span class="left"></span>
+		<img src="', $settings['images_url'], '/icons/profile_sm.gif" class="icon" alt="" align="top" />
+		<a href="', $scripturl ,'?action=profile;u=', $context['member']['id'] ,'">', $context['member']['name'] ,'</a> - ', $txt['profile_buddies'] ,'
+	</h3>
+	<div class="windowbg">
+		<span class="topslice"><span></span></span>
+		<div class="content">
+			<table width="100%">';
+
+	if (isset($context['member']['buddies_data'])) {
+		$i = 1;
+		foreach ($context['member']['buddies_data'] as $buddy_id => $data) {
+			if ($i == 1)
+				echo '
+					<tr>';
+			echo '
+					<td align="center">
+						', $data['avatar_image'],'<br />
+						<a href="', $scripturl , '?action=profile;u=', $data['id_member'] , '">' , $data['real_name'] , '</a><br />
+						<i>', $settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/buddy_' . ($data['is_online'] ? 'useron' : 'useroff') . '.gif' . '" alt="' . $txt[$data['is_online'] ? 'online' : 'offline'] . '" class="icon" />' : $txt[$data['is_online'] ? 'online2' : 'online3'], $settings['use_image_buttons'] ? '<span class="smalltext"> ' . $txt[$data['is_online'] ? 'online' : 'offline'] . '</span>' : '', '</i>
+					</td>';
+			if ($i == 3)
+				echo '
+					</tr>';
+			
+			$i++;
+			if ($i == 4) $i = 1;
+		}
+	} else
+		echo '		<tr><td>', $txt['profile_buddies_no'] ,'</td></tr>';
+	
+	echo '
+			</table>
+		</div>
+		<span class="botslice"><span></span></span>
+	</div>';
 }
 
 ?>

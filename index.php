@@ -260,6 +260,8 @@ function smf_main()
 		'announce' => array('Post.php', 'AnnounceTopic'),
 		'attachapprove' => array('ManageAttachments.php', 'ApproveAttach'),
 		'buddy' => array('Subs-Members.php', 'BuddyListToggle'),
+
+		'buddies' => array('Buddies.php', 'BuddiesMain'),
 		'calendar' => array('Calendar.php', 'CalendarMain'),
 		'clock' => array('Calendar.php', 'clock'),
 		'collapse' => array('BoardIndex.php', 'CollapseCategory'),
@@ -272,6 +274,7 @@ function smf_main()
 		'editpoll2' => array('Poll.php', 'EditPoll2'),
 		'emailuser' => array('SendTopic.php', 'EmailUser'),
 		'findmember' => array('Subs-Auth.php', 'JSMembers'),
+		'global' => array('LockTopic.php', 'GlobalTopic'),
 		'groups' => array('Groups.php', 'Groups'),
 		'help' => array('Help.php', 'ShowHelp'),
 		'helpadmin' => array('Help.php', 'ShowAdminHelp'),
@@ -312,6 +315,7 @@ function smf_main()
 		'reporttm' => array('SendTopic.php', 'ReportToModerator'),
 		'requestmembers' => array('Subs-Auth.php', 'RequestMembers'),
 		'restoretopic' => array('RemoveTopic.php', 'RestoreTopic'),
+		'savepad' => array('PersonalPad2.php', 'SavePad'),
 		'search' => array('Search.php', 'PlushSearch1'),
 		'search2' => array('Search.php', 'PlushSearch2'),
 		'sendtopic' => array('SendTopic.php', 'EmailUser'),
@@ -321,6 +325,7 @@ function smf_main()
 		'splittopics' => array('SplitTopics.php', 'SplitTopics'),
 		'stats' => array('Stats.php', 'DisplayStats'),
 		'sticky' => array('LockTopic.php', 'Sticky'),
+		'switchsubaccount' => array('SubAccount.php', 'SwitchSubAccount'),
 		'theme' => array('Themes.php', 'ThemesMain'),
 		'trackip' => array('Profile-View.php', 'trackIP'),
 		'about:mozilla' => array('Karma.php', 'BookOfUnknown'),
@@ -339,6 +344,11 @@ function smf_main()
 
 	// Allow modifying $actionArray easily.
 	call_integration_hook('integrate_actions', array(&$actionArray));
+
+	// Add custom actions to the array.
+	$custom_actions = explode(';', $modSettings['ca_cache']);
+	foreach ($custom_actions as $custom_action)
+		$actionArray[$custom_action] = array('CustomAction.php', 'ViewCustomAction');
 
 	// Get the function and file to include - if it's not there, do the board index.
 	if (!isset($_REQUEST['action']) || !isset($actionArray[$_REQUEST['action']]))

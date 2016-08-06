@@ -131,6 +131,7 @@ function AdminMain()
 						'layout' => array($txt['mods_cat_layout']),
 						'karma' => array($txt['karma'], 'enabled' => in_array('k', $context['admin_features'])),
 						'sig' => array($txt['signature_settings_short']),
+						'action' => array($txt['custom_action_shorttitle'], 'admin_forum'),
 						'profile' => array($txt['custom_profile_shorttitle'], 'enabled' => in_array('cp', $context['admin_features'])),
 					),
 				),
@@ -198,7 +199,8 @@ function AdminMain()
 						'general' => array($txt['mods_cat_modifications_misc']),
 						// Mod Authors for a "ADD AFTER" on this line. Ensure you end your change with a comma. For example:
 						// 'shout' => array($txt['shout']),
-						// Note the comma!! The setting with automatically appear with the first mod to be added.
+						// Note the comma!! The setting with automatically appear with the first mod to be added.						
+						'ultprofile' => array($txt['ultimate_profile']),
 					),
 				),
 			),
@@ -299,6 +301,18 @@ function AdminMain()
 					'subsections' => array(
 						'all' => array($txt['view_all_members']),
 						'search' => array($txt['mlist_search']),
+					),
+				),
+				'subaccounts' => array(
+					'label' => $txt['managesubaccounts'],
+					'file' => 'ManageMembers.php',
+					'function' => 'ManageSubAccounts',
+					'icon' => 'members.gif',
+					'permission' => array('moderate_forum'),
+					'enabled' => in_array('subaccount', $context['admin_features']),
+					'subsections' => array(
+						'settings' => array($txt['settings']),
+						'view' => array($txt['subaccount_view_all']),
 					),
 				),
 				'membergroups' => array(
@@ -720,7 +734,7 @@ function AdminSearchInternal()
 	// All the files we need to include.
 	$include_files = array(
 		'ManageSettings', 'ManageBoards', 'ManageNews', 'ManageAttachments', 'ManageCalendar', 'ManageMail', 'ManagePaid', 'ManagePermissions',
-		'ManagePosts', 'ManageRegistration', 'ManageSearch', 'ManageSearchEngines', 'ManageServer', 'ManageSmileys',
+		'ManagePosts', 'ManageRegistration', 'ManageSearch', 'ManageSearchEngines', 'ManageServer', 'ManageSmileys', 'ManageMembers',
 	);
 	foreach ($include_files as $file)
 		require_once($sourcedir . '/' . $file . '.php');
@@ -774,6 +788,7 @@ function AdminSearchInternal()
 		array('EditBoardSettings', 'area=manageboards;sa=settings'),
 		array('ModifyMailSettings', 'area=mailqueue;sa=settings'),
 		array('ModifyNewsSettings', 'area=news;sa=settings'),
+		array('ModifySubAccountSettings', 'area=subaccounts;sa=settings'),
 		array('GeneralPermissionSettings', 'area=permissions;sa=settings'),
 		array('ModifyPostSettings', 'area=postsettings;sa=posts'),
 		array('ModifyBBCSettings', 'area=postsettings;sa=bbc'),

@@ -107,6 +107,7 @@ function template_main()
 					<dd class="options">
 						<label for="show_complete"><input type="checkbox" name="show_complete" id="show_complete" value="1"', !empty($context['search_params']['show_complete']) ? ' checked="checked"' : '', ' class="input_check" /> ', $txt['search_show_complete_messages'], '</label><br />
 						<label for="subject_only"><input type="checkbox" name="subject_only" id="subject_only" value="1"', !empty($context['search_params']['subject_only']) ? ' checked="checked"' : '', ' class="input_check" /> ', $txt['search_subject_only'], '</label>
+						<label for="subaccount"><input type="checkbox" name="subaccount" id="subaccount" value="1"', !empty($context['search_params']['subaccount']) ? ' checked="checked"' : '', ' class="check" tabindex="', $context['tabindex']++, '" /> ', $txt['search_subaccount_users'], '</label>
 					</dd>
 					<dt class="between">', $txt['search_post_age'], ': </dt>
 					<dd>', $txt['search_between'], ' <input type="text" name="minage" value="', empty($context['search_params']['minage']) ? '0' : $context['search_params']['minage'], '" size="5" maxlength="4" class="input_text" />&nbsp;', $txt['search_and'], '&nbsp;<input type="text" name="maxage" value="', empty($context['search_params']['maxage']) ? '9999' : $context['search_params']['maxage'], '" size="5" maxlength="4" class="input_text" /> ', $txt['days_word'], '</dd>

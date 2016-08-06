@@ -350,6 +350,42 @@ function deleteMembers($users, $check_not_admin = false)
 		)
 	);
 
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}buddies
+		WHERE id_member IN ({array_int:users}) 
+			OR buddy_id IN ({array_int:users})',
+		array(
+			'users' => $users,
+		)
+	);
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}profile_comments
+		WHERE comment_member_id IN ({array_int:users})',
+		array(
+			'users' => $users,
+		)
+	);
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}profile_albums
+		WHERE id_member IN ({array_int:users})',
+		array(
+			'users' => $users,
+		)
+	);
+	$smcFunc['db_query']('', '
+		SELECT ID_PICTURE
+		FROM {db_prefix}profile_pictures
+		WHERE id_member IN ({array_int:users})',
+		array(
+			'users' => $users,
+		)
+	);
+	
+	require_once($sourcedir . '/Profile-Pictures.php');
+	while ($row = $smcFunc['db_fetch_assoc']($request)) {
+		delete_picture($row['ID_PICTURE']);
+	}
+
 	// Make their votes appear as guest votes - at least it keeps the totals right.
 	//!!! Consider adding back in cookie protection.
 	$smcFunc['db_query']('', '
@@ -740,7 +776,7 @@ function registerMember(&$regOptions, $return_errors = false)
 	$knownInts = array(
 		'date_registered', 'posts', 'id_group', 'last_login', 'instant_messages', 'unread_messages',
 		'new_pm', 'pm_prefs', 'gender', 'hide_email', 'show_online', 'pm_email_notify', 'karma_good', 'karma_bad',
-		'notify_announcements', 'notify_send_body', 'notify_regularity', 'notify_types',
+		'notify_announcements', 'notify_send_body', 'notify_regularity', 'notify_types', 'is_shareable',
 		'id_theme', 'is_activated', 'id_msg_last_visit', 'id_post_group', 'total_time_logged_in', 'warning',
 	);
 	$knownFloats = array(

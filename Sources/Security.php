@@ -324,7 +324,7 @@ function is_not_banned($forceCheck = false)
 						if (!isset($_SESSION['ban']['expire_time']) || ($_SESSION['ban']['expire_time'] != 0 && ($row['expire_time'] == 0 || $row['expire_time'] > $_SESSION['ban']['expire_time'])))
 							$_SESSION['ban']['expire_time'] = $row['expire_time'];
 
-						if (!$user_info['is_guest'] && $restriction == 'cannot_access' && ($row['id_member'] == $user_info['id'] || $row['email_address'] == $user_info['email']))
+						if (!$user_info['is_guest'] && $restriction == 'cannot_access' && ($row['id_member'] == $user_info['id'] || array_key_exists($row['id_member'], $user_info['subaccounts']) || $row['email_address'] == $user_info['email']))
 							$flag_is_activated = true;
 					}
 			}
@@ -536,7 +536,7 @@ function banPermissions()
 
 	//!!! Find a better place to call this? Needs to be after permissions loaded!
 	// Finally, some bits we cache in the session because it saves queries.
-	if (isset($_SESSION['mc']) && $_SESSION['mc']['time'] > $modSettings['settings_updated'] && $_SESSION['mc']['id'] == $user_info['id'])
+	if (isset($_SESSION['mc']) && $_SESSION['mc']['time'] > $modSettings['settings_updated'] && ($_SESSION['mc']['id'] == $user_info['id'] || array_key_exists($_SESSION['mc']['id'], $user_info['subaccounts'])))
 		$user_info['mod_cache'] = $_SESSION['mc'];
 	else
 	{
@@ -545,7 +545,7 @@ function banPermissions()
 	}
 
 	// Now that we have the mod cache taken care of lets setup a cache for the number of mod reports still open
-	if (isset($_SESSION['rc']) && $_SESSION['rc']['time'] > $modSettings['last_mod_report_action'] && $_SESSION['rc']['id'] == $user_info['id'])
+	if (isset($_SESSION['rc']) && $_SESSION['rc']['time'] > $modSettings['last_mod_report_action'] && ($_SESSION['rc']['id'] == $user_info['id'] || array_key_exists($_SESSION['rc']['id'], $user_info['subaccounts'])))
 		$context['open_mod_reports'] = $_SESSION['rc']['reports'];
 	elseif ($_SESSION['mc']['bq'] != '0=1')
 	{

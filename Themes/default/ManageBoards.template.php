@@ -449,6 +449,19 @@ function template_modify_board()
 						</dl>
 					</div>';
 
+	echo '
+					<div id="global_topics_div">
+						<dl class="settings">
+							<dt>
+								<strong>', $txt['global_topics_board'], ':</strong><br />
+								<span class="smalltext">', $txt['global_topics_board_desc'], '</span><br />
+							</dt>
+							<dd>
+								<input type="checkbox" name="global_topics" ', $context['board']['global_topics'] ? ' checked="checked"' : '', ' class="input_check" />
+							</dd>
+						</dl>
+					</div>';
+
 	// Here the user can choose to force this board to use a theme other than the default theme for the forum.
 	echo '
 					<div id="board_theme_div">
@@ -552,6 +565,8 @@ function template_modify_board()
 			// What to show?
 			document.getElementById("override_theme_div").style.display = redirectEnabled || !nonDefaultTheme ? "none" : "";
 			document.getElementById("board_theme_div").style.display = redirectEnabled ? "none" : "";
+			document.getElementById("global_topics_div").style.display = redirectEnabled? "none" : "";
+
 			document.getElementById("count_posts_div").style.display = redirectEnabled ? "none" : "";';
 
 	if (!$context['board']['topics'] && empty($context['board']['is_recycle']))

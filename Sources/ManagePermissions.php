@@ -1160,6 +1160,7 @@ function setPermissionLevel($level, $group, $profile = 'null')
 	));
 	$groupLevels['board']['moderator'] = array_merge($groupLevels['board']['standard'], array(
 		'make_sticky',
+		'make_global',
 		'poll_edit_any',
 		'delete_any',
 		'modify_any',
@@ -1415,6 +1416,7 @@ function loadAllPermissions($loadType = 'classic')
 				'use_pm_system',
 				'post_calendar',
 				'edit_profile',
+				'subaccounts',
 				'delete_account',
 				'use_avatar',
 				'moderate_general',
@@ -1427,6 +1429,7 @@ function loadAllPermissions($loadType = 'classic')
 				'maintenance',
 				'member_admin',
 				'profile',
+				'subaccounts',
 			),
 		),
 		'board' => array(
@@ -1488,9 +1491,15 @@ function loadAllPermissions($loadType = 'classic')
 			'profile_extra' => array(true, 'profile', 'edit_profile', 'moderate_general'),
 			'profile_title' => array(true, 'profile', 'edit_profile', 'moderate_general'),
 			'profile_remove' => array(true, 'profile', 'delete_account', 'moderate_general'),
+
+			'edit_ultimate_profile' => array(true, 'profile', 'edit_profile', 'moderate_general'),
 			'profile_server_avatar' => array(false, 'profile', 'use_avatar'),
 			'profile_upload_avatar' => array(false, 'profile', 'use_avatar'),
 			'profile_remote_avatar' => array(false, 'profile', 'use_avatar'),
+			'subaccounts_create' => array(true, 'subaccounts', 'subaccounts', 'moderate_general'),
+			'subaccounts_delete' => array(true, 'subaccounts', 'subaccounts', 'moderate_general'),
+			'subaccounts_merge' => array(true, 'subaccounts', 'subaccounts', 'moderate_general'),
+			'subaccounts_split' => array(true, 'subaccounts', 'subaccounts', 'moderate_general'),
 		),
 		'board' => array(
 			'moderate_board' => array(false, 'general_board', 'moderate'),
@@ -1503,6 +1512,7 @@ function loadAllPermissions($loadType = 'classic')
 			'split_any' => array(false, 'topic', 'moderate'),
 			'send_topic' => array(false, 'topic', 'moderate'),
 			'make_sticky' => array(false, 'topic', 'moderate'),
+			'make_global' => array(false, 'topic', 'moderate'),
 			'move' => array(true, 'topic', 'moderate', 'moderate'),
 			'lock' => array(true, 'topic', 'moderate', 'moderate'),
 			'remove' => array(true, 'topic', 'modify', 'moderate'),
@@ -1533,6 +1543,7 @@ function loadAllPermissions($loadType = 'classic')
 		'calendar',
 		'maintenance',
 		'member_admin',
+		'subaccounts',
 		'topic',
 		'post',
 	);
@@ -2194,8 +2205,14 @@ function loadIllegalGuestPermissions()
 		'manage_permissions',
 		'manage_bans',
 		'move_own',
+
+		'edit_ultimate_profile',
 		'modify_replies',
 		'send_mail',
+		'subaccounts_create',
+		'subaccounts_delete',
+		'subaccounts_merge',
+		'subaccounts_split',
 		'approve_posts',
 	);
 }

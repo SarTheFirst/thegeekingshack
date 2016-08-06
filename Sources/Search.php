@@ -414,6 +414,7 @@ function PlushSearch2()
 	{
 		$userString = strtr($smcFunc['htmlspecialchars']($search_params['userspec'], ENT_QUOTES), array('&quot;' => '"'));
 		$userString = strtr($userString, array('%' => '\%', '_' => '\_', '*' => '%', '?' => '_'));
+		$search_params['subaccount'] = !empty($search_params['subaccount']) || !empty($_REQUEST['subaccount']);
 
 		preg_match_all('~"([^"]+)"~', $userString, $matches);
 		$possible_users = array_merge($matches[1], explode(',', preg_replace('~"[^"]+"~', '', $userString)));
@@ -463,6 +464,22 @@ function PlushSearch2()
 			$memberlist = array();
 			while ($row = $smcFunc['db_fetch_assoc']($request))
 				$memberlist[] = $row['id_member'];
+			if ($search_params['subaccount'])
+			{
+				$request = $smcFunc['db_query']('', '
+					SELECT id_member
+					FROM {db_prefix}subaccounts
+					WHERE id_parent in ({array_int:users})',
+					array(
+						'users' => $memberlist,
+					)
+				);
+				while ($row = $smcFunc['db_fetch_assoc']($request))
+				{
+					$memberlist[] = $row['id_member'];
+				}
+			}
+			$memberlist = array_unique($memberlist);
 			$userQuery = $smcFunc['db_quote'](
 				'(m.id_member IN ({array_int:matched_members}) OR (m.id_member = {int:id_member_guest} AND ({raw:match_possible_guest_names})))',
 				array(

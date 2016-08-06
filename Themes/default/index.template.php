@@ -38,7 +38,7 @@
 // Initialize the template... mainly little settings.
 function template_init()
 {
-	global $context, $settings, $options, $txt;
+	global $context, $settings, $options, $txt, $user_info, $scripturl;
 
 	/* Use images from default theme when using templates from the default theme?
 		if this is 'always', images from the default theme will be used.
@@ -72,6 +72,22 @@ function template_init()
 
 	/* Set the following variable to true if this theme requires the optional theme strings file to be loaded. */
 	$settings['require_theme_strings'] = false;
+
+	$context['subaccount_dropdown'] = '';
+	if (!empty($user_info['subaccounts']))
+	{
+		 $context['subaccount_dropdown'] = '
+			<form style="display: inline; margin-left: 1em;" class="smalltext" action="' . $scripturl . '?action=switchsubaccount" method="post" name="subaccount_drop" id="subaccount_drop" enctype="multipart/form-data">
+				<select name="subaccount" size="1" onchange="document.subaccount_drop.submit()">
+					<option selected="selected">' . $txt['change_subaccount'] . '</option>';
+		foreach($user_info['subaccounts'] as $id => $subaccount)
+			$context['subaccount_dropdown'] .= '
+					<option value="' . $id . '">' . $subaccount['name'] . '</option>';
+		$context['subaccount_dropdown'] .= '
+				</select>
+				<input type="hidden" name="' . $context['session_var'] . '" value="' . $context['session_id'] . '" />
+			</form>';
+	}
 }
 
 // The main sub template above the content.
@@ -195,7 +211,7 @@ function template_body_above()
 				<p class="avatar">', $context['user']['avatar']['image'], '</p>';
 		echo '
 				<ul class="reset">
-					<li class="greeting">', $txt['hello_member_ndt'], ' <span>', $context['user']['name'], '</span></li>
+					<li class="greeting">', $txt['hello_member_ndt'], ' <span>', $context['user']['name'], '</span>', $context['subaccount_dropdown'], '</li>
 					<li><a href="', $scripturl, '?action=unread">', $txt['unread_since_visit'], '</a></li>
 					<li><a href="', $scripturl, '?action=unreadreplies">', $txt['show_unread_replies'], '</a></li>';
 

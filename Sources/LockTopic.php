@@ -154,5 +154,43 @@ function Sticky()
 	// Take them back to the now stickied topic.
 	redirectexit('topic=' . $topic . '.' . $_REQUEST['start'] . (WIRELESS ? ';moderate' : ''));
 }
+function GlobalTopic()
+{
+	global $smcFunc, $topic, $board, $board_info;
 
+	checkSession('get');
+
+	isAllowedTo('make_global');
+
+	if (empty($topic))
+		fatal_lang_error('not_a_topic', false);
+	if (empty($board_info['global_topics']))
+		fatal_lang_error('board_not_global', false);
+
+	$request = $smcFunc['db_query']('', '
+		SELECT is_global
+		FROM {db_prefix}topics
+		WHERE id_topic = {int:current_topic}
+		LIMIT 1',
+		array(
+			'current_topic' => $topic,
+		)
+	);
+	list ($is_global) = $smcFunc['db_fetch_row']($request);
+	$smcFunc['db_free_result']($request);
+
+	$smcFunc['db_query']('', '
+		UPDATE {db_prefix}topics
+		SET is_global = {int:is_global}
+		WHERE id_topic = {int:current_topic}',
+		array(
+			'current_topic' => $topic,
+			'is_global' => empty($is_global) ? 1 : 0,
+		)
+	);
+
+	logAction(empty($is_global) ? 'global' : 'unglobal', array('topic' => $topic, 'board' => $board));
+
+	redirectexit('topic=' . $topic . '.' . $_REQUEST['start'] . (WIRELESS ? ';moderate' : ''));
+}
 ?>

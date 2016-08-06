@@ -335,6 +335,7 @@ function loadUserSettings()
 {
 	global $modSettings, $user_settings, $sourcedir, $smcFunc;
 	global $cookiename, $user_info, $language;
+	global $scripturl, $context, $txt;
 
 	// Check first the integration, then the cookie, and last the session.
 	if (count($integration_ids = call_integration_hook('integrate_verify_user')) > 0)
@@ -379,9 +380,11 @@ function loadUserSettings()
 		if (empty($modSettings['cache_enable']) || $modSettings['cache_enable'] < 2 || ($user_settings = cache_get_data('user_settings-' . $id_member, 60)) == null)
 		{
 			$request = $smcFunc['db_query']('', '
-				SELECT mem.*, IFNULL(a.id_attach, 0) AS id_attach, a.filename, a.attachment_type
+				SELECT mem.*, IFNULL(a.id_attach, 0) AS id_attach, a.filename, a.attachment_type,
+					IFNULL(sub.id_parent, 0) as id_parent
 				FROM {db_prefix}members AS mem
 					LEFT JOIN {db_prefix}attachments AS a ON (a.id_member = {int:id_member})
+					LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
 				WHERE mem.id_member = {int:id_member}
 				LIMIT 1',
 				array(
@@ -520,6 +523,8 @@ function loadUserSettings()
 		'language' => empty($user_settings['lngfile']) || empty($modSettings['userLanguage']) ? $language : $user_settings['lngfile'],
 		'is_guest' => $id_member == 0,
 		'is_admin' => in_array(1, $user_info['groups']),
+		'id_parent' => !empty($user_settings['id_parent']) ? $user_settings['id_parent'] : 0,
+		'is_shareable' => !empty($user_settings['is_shareable']),
 		'theme' => empty($user_settings['id_theme']) ? 0 : $user_settings['id_theme'],
 		'last_login' => empty($user_settings['last_login']) ? 0 : $user_settings['last_login'],
 		'ip' => $_SERVER['REMOTE_ADDR'],
@@ -577,6 +582,93 @@ function loadUserSettings()
 	// Ok I guess they don't want to see all the boards
 	else
 		$user_info['query_wanna_see_board'] = '(' . $user_info['query_see_board'] . ' AND b.id_board NOT IN (' . implode(',', $user_info['ignoreboards']) . '))';
+
+	// And now setup their subaccounts (I do this here so I don't have to repeat code all over the place)
+	$user_info['subaccounts'] = array();
+	if (!$user_info['is_guest'] && !empty($modSettings['enableSubAccounts']))
+	{
+		$subaccounts = array();
+
+		// If it doesn't exist in the cache yet, find it and put it there
+		if(!empty($user_info['is_shareable']) || ($subaccounts = cache_get_data('user_subaccounts-' . $user_info['id'], 240)) == null)
+		{
+			// If this account is shareable, check for the cookie and process as needed
+			if (!empty($user_info['is_shareable']))
+			{
+				$subaccount_cookie = $cookiename . '_parent';
+				if (isset($_COOKIE[$subaccount_cookie]))
+				{
+					// Fix a security hole in PHP 4.3.9 and below...
+					if (preg_match('~^a:[34]:\{i:0;(i:\d{1,6}|s:[1-8]:"\d{1,8}");i:1;s:(0|40):"([a-fA-F0-9]{40})?";i:2;[id]:\d{1,14};(i:3;i:\d;)?\}$~i', $_COOKIE[$subaccount_cookie]) == 1)
+					{
+						list ($id_parent, $password_parent) = @unserialize($_COOKIE[$subaccount_cookie]);
+						$id_parent = !empty($id_parent) && strlen($password_parent) > 0 ? (int) $id_parent : 0;
+					}
+					else
+						$id_parent = 0;
+				}
+				elseif (empty($id_parent) && isset($_SESSION['login_' . $subaccount_cookie]) && ($_SESSION['USER_AGENT'] == $_SERVER['HTTP_USER_AGENT'] || !empty($modSettings['disableCheckUA'])))
+				{
+					// !!! Perhaps we can do some more checking on this, such as on the first octet of the IP?
+					list ($id_parent, $password_parent, $login_span) = @unserialize($_SESSION['login_' . $subaccount_cookie]);
+					$id_parent = !empty($id_parent) && strlen($password_parent) == 40 && $login_span > time() ? (int) $id_parent : 0;
+				}
+
+				$valid_parent = false;
+				if (!empty($id_parent))
+				{
+					$request = $smcFunc['db_query']('', '
+						SELECT passwd, password_salt
+						FROM {db_prefix}members
+						WHERE id_member = {int:id_parent}',
+						array(
+							'id_parent' => $id_parent,
+						)
+					);
+					$parent_user = $smcFunc['db_fetch_assoc']($request);
+
+					if (strlen($password_parent) == 40)
+						$valid_parent = sha1($parent_user['passwd'] . $parent_user['password_salt']) == $password_parent;
+					else
+						$valid_parent = false;
+				}
+
+				// If we didn't have a valid user subaccount parent, log them out.
+				if (!$valid_parent)
+				{
+					require_once($sourcedir . '/LogInOut.php');
+					Logout(true);
+				}
+				// Otherwise we have a valid parent, let's use it
+				else
+					$user_info['id_parent'] = $id_parent;
+			}
+
+			$request = $smcFunc['db_query']('', '
+				SELECT mem.id_member, mem.real_name, mem.member_name, mem.is_shareable
+				FROM {db_prefix}members AS mem
+					LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+				WHERE (sub.id_parent = {int:parent_id} OR mem.id_member = {int:parent_id})
+					AND mem.id_member != {int:current_id}',
+				array(
+					'parent_id' => !empty($user_info['id_parent']) ? $user_info['id_parent'] : $user_info['id'],
+					'current_id' => $user_info['id'],
+				)
+			);
+			while ($row = $smcFunc['db_fetch_assoc']($request))
+				$subaccounts[$row['id_member']] = array(
+					'id' => $row['id_member'],
+					'name' => $row['real_name'],
+					'shareable' => $row['is_shareable'],
+				);
+			$smcFunc['db_free_result']($request);
+
+			// put the data into smf's cache if this is not a sharable account
+			if (empty($user_info['is_shareable']))
+				cache_put_data('user_subaccounts-' . $user_info['id'], $subaccounts, 240);
+		}
+		$user_info['subaccounts'] = !empty($subaccounts) ? $subaccounts : array();
+	}
 }
 
 // Check for moderators and see if they have access to the board.
@@ -661,7 +753,7 @@ function loadBoard()
 				c.id_cat, b.name AS bname, b.description, b.num_topics, b.member_groups,
 				b.id_parent, c.name AS cname, IFNULL(mem.id_member, 0) AS id_moderator,
 				mem.real_name' . (!empty($topic) ? ', b.id_board' : '') . ', b.child_level,
-				b.id_theme, b.override_theme, b.count_posts, b.id_profile, b.redirect,
+				b.id_theme, b.override_theme, b.global_topics, b.count_posts, b.id_profile, b.redirect,
 				b.unapproved_topics, b.unapproved_posts' . (!empty($topic) ? ', t.approved, t.id_member_started' : '') . '
 			FROM {db_prefix}boards AS b' . (!empty($topic) ? '
 				INNER JOIN {db_prefix}topics AS t ON (t.id_topic = {int:current_topic})' : '') . '
@@ -704,6 +796,7 @@ function loadBoard()
 				'override_theme' => !empty($row['override_theme']),
 				'profile' => $row['id_profile'],
 				'redirect' => $row['redirect'],
+				'global_topics' => $row['global_topics'],
 				'posts_count' => empty($row['count_posts']),
 				'cur_topic_approved' => empty($topic) || $row['approved'],
 				'cur_topic_starter' => empty($topic) ? 0 : $row['id_member_started'],
@@ -952,7 +1045,7 @@ function loadPermissions()
 // Loads an array of users' data by ID or member_name.
 function loadMemberData($users, $is_name = false, $set = 'normal')
 {
-	global $user_profile, $modSettings, $board_info, $smcFunc;
+	global $user_profile, $modSettings, $board_info, $smcFunc, $context;
 
 	// Can't just look for no users :P.
 	if (empty($users))
@@ -983,7 +1076,7 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 			IFNULL(lo.log_time, 0) AS is_online, IFNULL(a.id_attach, 0) AS id_attach, a.filename, a.attachment_type,
 			mem.signature, mem.personal_text, mem.location, mem.gender, mem.avatar, mem.id_member, mem.member_name,
 			mem.real_name, mem.email_address, mem.hide_email, mem.date_registered, mem.website_title, mem.website_url,
-			mem.birthdate, mem.member_ip, mem.member_ip2, mem.icq, mem.aim, mem.yim, mem.msn, mem.posts, mem.last_login,
+			mem.birthdate, mem.member_ip, mem.member_ip2, mem.icq, mem.aim, mem.yim, mem.msn, mem.posts, mem.last_login, IFNULL(sub.id_parent, 0) as id_parent, mem.is_shareable,
 			mem.karma_good, mem.id_post_group, mem.karma_bad, mem.lngfile, mem.id_group, mem.time_offset, mem.show_online,
 			mem.buddy_list, mg.online_color AS member_group_color, IFNULL(mg.group_name, {string:blank_string}) AS member_group,
 			pg.online_color AS post_group_color, IFNULL(pg.group_name, {string:blank_string}) AS post_group, mem.is_activated, mem.warning,
@@ -993,7 +1086,8 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 			LEFT JOIN {db_prefix}log_online AS lo ON (lo.id_member = mem.id_member)
 			LEFT JOIN {db_prefix}attachments AS a ON (a.id_member = mem.id_member)
 			LEFT JOIN {db_prefix}membergroups AS pg ON (pg.id_group = mem.id_post_group)
-			LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)';
+			LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)
+			LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)';
 	}
 	elseif ($set == 'profile')
 	{
@@ -1002,24 +1096,25 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 			mem.signature, mem.personal_text, mem.location, mem.gender, mem.avatar, mem.id_member, mem.member_name,
 			mem.real_name, mem.email_address, mem.hide_email, mem.date_registered, mem.website_title, mem.website_url,
 			mem.openid_uri, mem.birthdate, mem.icq, mem.aim, mem.yim, mem.msn, mem.posts, mem.last_login, mem.karma_good,
-			mem.karma_bad, mem.member_ip, mem.member_ip2, mem.lngfile, mem.id_group, mem.id_theme, mem.buddy_list,
+			mem.karma_bad, mem.member_ip, mem.member_ip2, mem.lngfile, mem.id_group, mem.id_theme, mem.buddy_list, IFNULL(sub.id_parent, 0) as id_parent, mem.is_shareable,
 			mem.pm_ignore_list, mem.pm_email_notify, mem.pm_receive_from, mem.time_offset' . (!empty($modSettings['titlesEnable']) ? ', mem.usertitle' : '') . ',
 			mem.time_format, mem.secret_question, mem.is_activated, mem.additional_groups, mem.smiley_set, mem.show_online,
 			mem.total_time_logged_in, mem.id_post_group, mem.notify_announcements, mem.notify_regularity, mem.notify_send_body,
 			mem.notify_types, lo.url, mg.online_color AS member_group_color, IFNULL(mg.group_name, {string:blank_string}) AS member_group,
 			pg.online_color AS post_group_color, IFNULL(pg.group_name, {string:blank_string}) AS post_group, mem.ignore_boards, mem.warning,
-			CASE WHEN mem.id_group = 0 OR mg.stars = {string:blank_string} THEN pg.stars ELSE mg.stars END AS stars, mem.password_salt, mem.pm_prefs';
+			CASE WHEN mem.id_group = 0 OR mg.stars = {string:blank_string} THEN pg.stars ELSE mg.stars END AS stars, mem.password_salt, mem.passwd, mem.pm_prefs';
 		$select_tables = '
 			LEFT JOIN {db_prefix}log_online AS lo ON (lo.id_member = mem.id_member)
 			LEFT JOIN {db_prefix}attachments AS a ON (a.id_member = mem.id_member)
 			LEFT JOIN {db_prefix}membergroups AS pg ON (pg.id_group = mem.id_post_group)
-			LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)';
+			LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)
+			LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)';
 	}
 	elseif ($set == 'minimal')
 	{
 		$select_columns = '
 			mem.id_member, mem.member_name, mem.real_name, mem.email_address, mem.hide_email, mem.date_registered,
-			mem.posts, mem.last_login, mem.member_ip, mem.member_ip2, mem.lngfile, mem.id_group';
+			mem.posts, mem.last_login, mem.member_ip, mem.member_ip2, mem.lngfile, mem.id_group, mem.is_shareable';
 		$select_tables = '';
 	}
 	else
@@ -1043,6 +1138,7 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 			$new_loaded_ids[] = $row['id_member'];
 			$loaded_ids[] = $row['id_member'];
 			$row['options'] = array();
+			$row['subaccounts'] = array();
 			$user_profile[$row['id_member']] = $row;
 		}
 		$smcFunc['db_free_result']($request);
@@ -1061,6 +1157,43 @@ function loadMemberData($users, $is_name = false, $set = 'normal')
 		while ($row = $smcFunc['db_fetch_assoc']($request))
 			$user_profile[$row['id_member']]['options'][$row['variable']] = $row['value'];
 		$smcFunc['db_free_result']($request);
+	}
+
+	if (!empty($new_loaded_ids) && ($context['user']['is_admin'] || !empty($modSettings['enableSubAccounts'])) && $set != 'minimal')
+	{
+		// And now setup their subaccounts (I do this here so I don't have to repeat code all over the place)
+		// Really, this should only run for main accounts, no sub accounts
+		foreach($new_loaded_ids as $id)
+		{
+			$subaccounts = array();
+
+			// If it doesn't exist in the cache yet, find it and put it there
+			if (!empty($modSettings['enableSubAccounts']) && empty($user_profile[$id]['id_parent']) && ($subaccounts = cache_get_data('user_subaccounts-' . $id, 240)) == null)
+			{
+				$request = $smcFunc['db_query']('', '
+					SELECT mem.id_member, mem.real_name, mem.member_name, mem.is_shareable
+					FROM {db_prefix}members AS mem
+						LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+					WHERE sub.id_parent = {int:parent_id}',
+					array(
+						'parent_id' => $id,
+					)
+				);
+				while ($row = $smcFunc['db_fetch_assoc']($request))
+					$subaccounts[$row['id_member']] = array(
+						'id' => $row['id_member'],
+						'name' => $row['real_name'],
+						'shareable' => $row['is_shareable'],
+					);
+				$smcFunc['db_free_result']($request);
+
+				// put the data into smf's cache
+				cache_put_data('user_subaccounts-' . $id, $subaccounts, 240);
+			}
+
+			// Now populate...
+			$user_profile[$id]['subaccounts'] = !empty($subaccounts) ? $subaccounts : array();
+		}
 	}
 
 	if (!empty($new_loaded_ids) && !empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 3)
@@ -1250,6 +1383,9 @@ function loadMemberContext($user, $display_custom_fields = false)
 		'warning' => $profile['warning'],
 		'warning_status' => !empty($modSettings['warning_mute']) && $modSettings['warning_mute'] <= $profile['warning'] ? 'mute' : (!empty($modSettings['warning_moderate']) && $modSettings['warning_moderate'] <= $profile['warning'] ? 'moderate' : (!empty($modSettings['warning_watch']) && $modSettings['warning_watch'] <= $profile['warning'] ? 'watch' : (''))),
 		'local_time' => timeformat(time() + ($profile['time_offset'] - $user_info['time_offset']) * 3600, false),
+		'subaccounts' => $profile['subaccounts'],
+		'is_subaccount' => !empty($profile['id_parent']),
+		'is_shareable' => $profile['is_shareable'],
 	);
 
 	// First do a quick run through to make sure there is something to be shown.

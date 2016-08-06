@@ -182,9 +182,11 @@ function MLAll()
 		if (empty($memberlist_cache) || empty($modSettings['memberlist_updated']) || $memberlist_cache['last_update'] < $modSettings['memberlist_updated'])
 		{
 			$request = $smcFunc['db_query']('', '
-				SELECT real_name
-				FROM {db_prefix}members
-				WHERE is_activated = {int:is_activated}
+				SELECT mem.real_name
+				FROM {db_prefix}members AS mem
+					LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+				WHERE mem.is_activated = {int:is_activated}
+					AND sub.id_member IS NULL
 				ORDER BY real_name',
 				array(
 					'is_activated' => 1,
@@ -218,8 +220,10 @@ function MLAll()
 	{
 		$request = $smcFunc['db_query']('', '
 			SELECT COUNT(*)
-			FROM {db_prefix}members
-			WHERE is_activated = {int:is_activated}',
+			FROM {db_prefix}members AS mem
+				LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+			WHERE mem.is_activated = {int:is_activated}
+				AND sub.id_member IS NULL',
 			array(
 				'is_activated' => 1,
 			)
@@ -241,9 +245,11 @@ function MLAll()
 
 		$request = $smcFunc['db_query']('substring', '
 			SELECT COUNT(*)
-			FROM {db_prefix}members
-			WHERE LOWER(SUBSTRING(real_name, 1, 1)) < {string:first_letter}
-				AND is_activated = {int:is_activated}',
+			FROM {db_prefix}members AS mem
+				LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
+			WHERE LOWER(SUBSTRING(mem.real_name, 1, 1)) < {string:first_letter}
+				AND mem.is_activated = {int:is_activated}
+				AND sub.id_member IS NULL',
 			array(
 				'is_activated' => 1,
 				'first_letter' => $_REQUEST['start'],
@@ -374,8 +380,10 @@ function MLAll()
 		FROM {db_prefix}members AS mem' . ($_REQUEST['sort'] === 'is_online' ? '
 			LEFT JOIN {db_prefix}log_online AS lo ON (lo.id_member = mem.id_member)' : '') . ($_REQUEST['sort'] === 'id_group' ? '
 			LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = CASE WHEN mem.id_group = {int:regular_id_group} THEN mem.id_post_group ELSE mem.id_group END)' : '') . '
+			LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)
 		WHERE mem.is_activated = {int:is_activated}' . (empty($where) ? '' : '
 			AND ' . $where) . '
+			AND sub.id_member IS NULL
 		ORDER BY {raw:sort}
 		LIMIT ' . $limit . ', ' . $modSettings['defaultMaxMembers'],
 		$query_parameters
@@ -527,6 +535,8 @@ function MLSearch()
 
 		$query = $_POST['search'] == '' ? '= {string:blank_string}' : 'LIKE {string:search}';
 
+		$customJoin[] = 'LEFT JOIN {db_prefix}subaccounts AS sub ON (sub.id_member = mem.id_member)';
+
 		$request = $smcFunc['db_query']('', '
 			SELECT COUNT(*)
 			FROM {db_prefix}members AS mem
@@ -534,7 +544,8 @@ function MLSearch()
 				(empty($customJoin) ? '' : implode('
 				', $customJoin)) . '
 			WHERE (' . implode( ' ' . $query . ' OR ', $fields) . ' ' . $query . $condition . ')
-				AND mem.is_activated = {int:is_activated}',
+				AND mem.is_activated = {int:is_activated}
+				AND sub.id_member IS NULL',
 			$query_parameters
 		);
 		list ($numResults) = $smcFunc['db_fetch_row']($request);
@@ -553,6 +564,7 @@ function MLSearch()
 				', $customJoin)) . '
 			WHERE (' . implode( ' ' . $query . ' OR ', $fields) . ' ' . $query . $condition . ')
 				AND mem.is_activated = {int:is_activated}
+				AND sub.id_member IS NULL
 			LIMIT ' . $_REQUEST['start'] . ', ' . $modSettings['defaultMaxMembers'],
 			$query_parameters
 		);
@@ -613,6 +625,8 @@ function printMemberListRows($request)
 	loadMemberData($members);
 
 	$context['members'] = array();
+	$context['subaccount_list'] = array();
+	$context['subaccounts_online'] = array();
 	foreach ($members as $member)
 	{
 		if (!loadMemberContext($member))
@@ -621,6 +635,31 @@ function printMemberListRows($request)
 		$context['members'][$member] = $memberContext[$member];
 		$context['members'][$member]['post_percent'] = round(($context['members'][$member]['real_posts'] * 100) / $MOST_POSTS);
 		$context['members'][$member]['registered_date'] = strftime('%Y-%m-%d', $context['members'][$member]['registered_timestamp']);
+
+		if (!empty($context['members'][$member]['subaccounts']) && !empty($modSettings['subaccountsShowInMemberlist']))
+		{
+			if (!$context['members'][$member]['online']['is_online'])
+				$context['subaccount_list'] = array_merge($context['subaccount_list'], array_keys($context['members'][$member]['subaccounts']));
+			else
+				foreach ($context['members'][$member]['subaccounts'] as $account)
+					$context['subaccounts_online'][$account['id']] = $settings['images_url'] . '/useroff.gif';
+		}
+	}
+
+	if (!empty($context['subaccount_list']))
+	{
+		$request = $smcFunc['db_query']('', '
+			SELECT IFNULL(lo.log_time, 0) AS is_online, mem.id_member
+			FROM {db_prefix}members as mem
+				LEFT JOIN {db_prefix}log_online as lo ON (lo.id_member = mem.id_member)
+			WHERE mem.id_member IN ({array_int:members})',
+			array(
+				'members' => $context['subaccount_list'],
+			)
+		);
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$context['subaccounts_online'][$row['id_member']] = $settings['images_url'] . '/' . (!empty($row['is_online']) ? 'useron' : 'useroff') . '.gif';
+		$smcFunc['db_free_result']($request);
 	}
 }
 

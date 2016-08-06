@@ -1375,6 +1375,8 @@ function editBuddyIgnoreLists($memID)
 // Show all the users buddies, as well as a add/delete interface.
 function editBuddies($memID)
 {
+	/*
+	**** Sorry devs, we should comment your codes :/ ****
 	global $txt, $scripturl, $modSettings;
 	global $context, $user_profile, $memberContext, $smcFunc;
 
@@ -1477,6 +1479,10 @@ function editBuddies($memID)
 		loadMemberContext($buddy);
 		$context['buddies'][$buddy] = $memberContext[$buddy];
 	}
+	*/
+	global $sourcedir;
+	require_once($sourcedir . '/Buddies.php');
+	BuddiesMain();
 }
 
 // Allows the user to view their ignore list, as well as the option to manage members on it.
@@ -1588,7 +1594,7 @@ function editIgnoreList($memID)
 
 function account($memID)
 {
-	global $context, $txt;
+	global $context, $txt, $cur_profile;
 
 	loadThemeOptions($memID);
 	if (allowedTo(array('profile_identity_own', 'profile_identity_any')))
@@ -1597,15 +1603,16 @@ function account($memID)
 	$context['sub_template'] = 'edit_options';
 	$context['page_desc'] = $txt['account_info'];
 
-	setupProfileContext(
+	$profileContext = array('member_name', 'real_name', 'date_registered', 'posts', 'lngfile', 'hr', 'id_group', 'hr',);
+	$profileContext = array_merge($profileContext, empty($cur_profile['id_parent']) ?
 		array(
-			'member_name', 'real_name', 'date_registered', 'posts', 'lngfile', 'hr',
-			'id_group', 'hr',
 			'email_address', 'hide_email', 'show_online', 'hr',
 			'passwrd1', 'passwrd2', 'hr',
-			'secret_question', 'secret_answer',
-		)
-	);
+			'secret_question', 'secret_answer') :
+		array('hide_email', 'show_online', 'hr',
+			'passwrd1', 'passwrd2', 'hr',));
+
+	setupProfileContext($profileContext);
 }
 
 function forumProfile($memID)
@@ -1647,6 +1654,75 @@ function pmprefs($memID)
 			'pm_prefs',
 		)
 	);
+}
+
+function customized($memID)
+{
+	global $context, $modSettings, $sourcedir, $smcFunc, $func, $txt;
+	
+	// Filter bad HTML...
+	require_once $sourcedir . '/HtmLawed.php';
+	
+	/*
+	See http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/htmLawed_README.htm for more information.
+	*/
+	$config_filter = array(
+		'safe'=> 1, 
+		'elements' => '*+embed+object+style-form-textarea-input-button'
+	);
+	
+	// HTML&CSS customization field
+	$request = $smcFunc['db_query']('', '
+			SELECT value 
+			FROM {db_prefix}themes 
+			WHERE id_member = {int:id_member}
+			AND variable = "css"',
+			array(
+				'id_member' => $memID,
+			)
+	);
+	list($old_html) = $smcFunc['db_fetch_row']($request);
+	
+	$html = substr(htmLawed(un_htmlspecialchars($old_html), $config_filter), 0, 65533);
+	$smcFunc['db_query']('', '
+			UPDATE {db_prefix}themes SET 
+			value = {string:html} 
+			WHERE id_member = {int:id_member}
+				AND variable = "css"',
+			array(
+				'html' => addslashes(htmlspecialchars($html)),
+				'id_member' => $memID,
+			)
+	);
+	
+	// MediaBox field
+	$request = $smcFunc['db_query']('', '
+			SELECT value 
+			FROM {db_prefix}themes 
+			WHERE id_member = {int:id_member}
+				AND variable = "media"',
+			array(
+				'id_member' => $memID,
+			)
+	);
+	list($old_html) = $smcFunc['db_fetch_row']($request);
+	
+	$html = substr(htmLawed(un_htmlspecialchars($old_html), $config_filter), 0, 65533);
+	$smcFunc['db_query']('', '
+			UPDATE {db_prefix}themes SET 
+			value = {string:html} 
+			WHERE id_member = {int:id_member}
+				AND variable = "media"',
+			array(
+				'html' => addslashes(htmlspecialchars($html)),
+				'id_member' => $memID,
+			)
+	);
+
+	loadLanguage('UltimateProfile');
+
+	$context['sub_template'] = 'customized';
+	$context['page_desc'] = $txt['profile_customized'];
 }
 
 // Recursive function to retrieve avatar files
@@ -3423,6 +3499,49 @@ function groupMembership2($profile_vars, $post_errors, $memID)
 	updateMemberData($memID, array('id_group' => $newPrimary, 'additional_groups' => $addGroups));
 
 	return $changeType;
+}
+function manageSubAccounts($memID)
+{
+	global $context, $sourcedir, $modSettings, $cur_profile;
+
+	loadTemplate('SubAccount');
+
+	// Load up permissions
+	$anyown_permissions = array(
+		'can_create' => 'subaccounts_create',
+		'can_delete' => 'subaccounts_delete',
+		'can_merge' => 'subaccounts_merge',
+		'can_split' => 'subaccounts_split',
+		'can_reassign' => 'subaccounts_create',
+	);
+	foreach ($anyown_permissions as $contextual => $perm)
+		$context[$contextual] = allowedTo($perm . '_any') || allowedTo($perm . '_own');
+
+	$max_subaccounts = !empty($modSettings['subaccount_max_group_' . $cur_profile['id_group']]) ? $modSettings['subaccount_max_group_' . $cur_profile['id_group']] : 0;
+	$context['can_create'] = $context['can_create'] && (!empty($context['user']['is_admin']) || count($cur_profile['subaccounts']) < $max_subaccounts || $max_subaccounts == 0);
+
+	$context['can_browse'] = $context['can_create'] || $context['can_delete'] || $context['can_merge'] || $context['can_split'];
+
+	$sub_actions = array(
+		'browse' => 'SubAccountBrowse',
+		'create' => 'SubAccountCreate',
+		'delete' => 'SubAccountDelete',
+		'merge' => 'SubAccountMerge',
+		'split' => 'SubAccountSplit',
+		'reassign' => 'SubAccountParent',
+	);
+
+	// What are we trying to do...
+	$context['area'] = !empty($_REQUEST['sa']) && array_key_exists($_REQUEST['sa'], $sub_actions) ? $_REQUEST['sa'] : 'browse';
+
+	// Handle the permission checking here.  If they can't do what they want, kick 'em out...
+	if(empty($context['can_' . $context['area']]))
+		fatal_lang_error('cannot_subaccounts_' . $context['area'] . '_own', false);
+
+	// Now load up our file and call the proper function...
+	require_once($sourcedir . '/SubAccount.php');
+
+	$sub_actions[$context['area']]($memID);
 }
 
 ?>

@@ -758,4 +758,9 @@ $txt['debug_query_which_took_at'] = 'which took %1$s seconds at %2$s into reques
 $txt['debug_show_queries'] = '[Show Queries]';
 $txt['debug_hide_queries'] = '[Hide Queries]';
 
+$txt['spoiler'] = "Spoiler";
+$txt['debug_hide'] = 'hide';
+$txt['spoiler_no_guests'] = 'Check to disable spoilers for guests globally:';
+$txt['spoiler_no_guest_html'] = '[ You must <a href="' . $scripturl . '?action=login">login</a> or <a href="' . $scripturl . '?action=register">register</a> to view this spoiler! ]';
+
 ?>

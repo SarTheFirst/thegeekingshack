@@ -499,7 +499,7 @@ function updateMemberData($members, $data)
 	$knownInts = array(
 		'date_registered', 'posts', 'id_group', 'last_login', 'instant_messages', 'unread_messages',
 		'new_pm', 'pm_prefs', 'gender', 'hide_email', 'show_online', 'pm_email_notify', 'pm_receive_from', 'karma_good', 'karma_bad',
-		'notify_announcements', 'notify_send_body', 'notify_regularity', 'notify_types',
+		'notify_announcements', 'notify_send_body', 'notify_regularity', 'notify_types', 'is_shareable',
 		'id_theme', 'is_activated', 'id_msg_last_visit', 'id_post_group', 'total_time_logged_in', 'warning',
 	);
 	$knownFloats = array(
@@ -2848,7 +2848,7 @@ function obExit($header = null, $do_footer = null, $from_index = false, $from_fa
 	}
 
 	// Remember this URL in case someone doesn't like sending HTTP_REFERER.
-	if (strpos($_SERVER['REQUEST_URL'], 'action=dlattach') === false && strpos($_SERVER['REQUEST_URL'], 'action=viewsmfile') === false)
+	if (strpos($_SERVER['REQUEST_URL'], 'action=dlattach') === false && strpos($_SERVER['REQUEST_URL'], 'action=viewsmfile') === false && !isset($_REQUEST['xml']))
 		$_SESSION['old_url'] = $_SERVER['REQUEST_URL'];
 
 	// For session check verfication.... don't switch browsers...
@@ -3178,6 +3178,10 @@ function determineTopicClass(&$topic_context)
 
 	if ($topic_context['is_sticky'])
 		$topic_context['class'] .= '_sticky';
+
+	//Global Topics have full priority
+	if (!empty($topic_context['is_global']))
+		$topic_context['class'] = 'global';
 
 	// This is so old themes will still work.
 	$topic_context['extended_class'] = &$topic_context['class'];
@@ -4102,6 +4106,21 @@ function setupMenuContext()
 
 		// Allow editing menu buttons easily.
 		call_integration_hook('integrate_menu_buttons', array(&$buttons));
+
+
+		// Any custom action buttons?
+		$ca_buttons = unserialize($modSettings['ca_menu_cache']);
+		foreach ($ca_buttons as $button)
+		{
+			$buttons[$button[0]] = array(
+				'title' => $button[1],
+				'href' => $scripturl . '?action=' . $button[0],
+				'show' => $button[2] ? allowedTo($button[2]) : true,
+				'sub_buttons' => array(
+				),
+				'is_last' => true,
+			);
+		}
 
 		// Now we put the buttons in the context so the theme can use them.
 		$menu_buttons = array();

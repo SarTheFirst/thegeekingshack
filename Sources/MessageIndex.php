@@ -321,6 +321,30 @@ function MessageIndex()
 	else
 		$fake_ascending = false;
 
+	if (empty($_REQUEST['start']) && !empty($board_info['global_topics']))
+	{
+		$result = $smcFunc['db_query']('', '
+			SELECT COUNT(*)
+			FROM {db_prefix}topics AS t
+				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+			WHERE {query_see_board}' . (!$modSettings['postmod_active'] || $context['can_approve_posts'] ? '' : '
+				AND (t.approved = {int:is_approved}' . ($user_info['is_guest'] ? '' : ' OR t.id_member_started = {int:current_member}') . ')') . '
+				AND t.is_global = {int:is_global}
+				AND b.id_board != {int:current_board}',
+			array(
+				'current_member' => $user_info['id'],
+				'is_approved' => 1,
+				'is_global' => 1,
+				'current_board' => $board,
+			)
+		);
+		list ($global_topics) = $smcFunc['db_fetch_row']($result);
+		$smcFunc['db_free_result']($result);
+
+		if (!empty($global_topics))
+			$maxindex += $global_topics;
+	}
+
 	// Setup the default topic icons...
 	$stable_icons = array('xx', 'thumbup', 'thumbdown', 'exclamation', 'question', 'lamp', 'smiley', 'angry', 'cheesy', 'grin', 'sad', 'wink', 'moved', 'recycled', 'wireless', 'clip');
 	$context['icon_sources'] = array();
@@ -341,15 +365,16 @@ function MessageIndex()
 				INNER JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)' : '')) . ($context['sort_by'] === 'starter' ? '
 				LEFT JOIN {db_prefix}members AS memf ON (memf.id_member = mf.id_member)' : '') . ($context['sort_by'] === 'last_poster' ? '
 				LEFT JOIN {db_prefix}members AS meml ON (meml.id_member = ml.id_member)' : '') . '
-			WHERE t.id_board = {int:current_board}' . (!$modSettings['postmod_active'] || $context['can_approve_posts'] ? '' : '
+			WHERE ' . (empty($global_topics) ? 't.id_board = {int:current_board}' : '(t.id_board = {int:current_board} OR is_global = {int:is_global})') . (!$modSettings['postmod_active'] || $context['can_approve_posts'] ? '' : '
 				AND (t.approved = {int:is_approved}' . ($user_info['is_guest'] ? '' : ' OR t.id_member_started = {int:current_member}') . ')') . '
-			ORDER BY ' . (!empty($modSettings['enableStickyTopics']) ? 'is_sticky' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . $_REQUEST['sort'] . ($ascending ? '' : ' DESC') . '
+			ORDER BY ' . (!empty($board_info['global_topics']) ? 'is_global' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . (!empty($modSettings['enableStickyTopics']) ? 'is_sticky' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . $_REQUEST['sort'] . ($ascending ? '' : ' DESC') . '
 			LIMIT {int:start}, {int:maxindex}',
 			array(
 				'current_board' => $board,
 				'current_member' => $user_info['id'],
 				'is_approved' => 1,
 				'id_member_guest' => 0,
+				'is_global' => 1,
 				'start' => $start,
 				'maxindex' => $maxindex,
 			)
@@ -367,7 +392,7 @@ function MessageIndex()
 
 		$result = $smcFunc['db_query']('substring', '
 			SELECT
-				t.id_topic, t.num_replies, t.locked, t.num_views, t.is_sticky, t.id_poll, t.id_previous_board,
+				t.id_topic, t.num_replies, t.locked, t.num_views, t.is_sticky, t.is_global, t.id_poll, t.id_previous_board,
 				' . ($user_info['is_guest'] ? '0' : 'IFNULL(lt.id_msg, IFNULL(lmr.id_msg, -1)) + 1') . ' AS new_from,
 				t.id_last_msg, t.approved, t.unapproved_posts, ml.poster_time AS last_poster_time,
 				ml.id_msg_modified, ml.subject AS last_subject, ml.icon AS last_icon,
@@ -384,15 +409,16 @@ function MessageIndex()
 				LEFT JOIN {db_prefix}members AS memf ON (memf.id_member = mf.id_member)' . ($user_info['is_guest'] ? '' : '
 				LEFT JOIN {db_prefix}log_topics AS lt ON (lt.id_topic = t.id_topic AND lt.id_member = {int:current_member})
 				LEFT JOIN {db_prefix}log_mark_read AS lmr ON (lmr.id_board = {int:current_board} AND lmr.id_member = {int:current_member})'). '
-			WHERE ' . ($pre_query ? 't.id_topic IN ({array_int:topic_list})' : 't.id_board = {int:current_board}') . (!$modSettings['postmod_active'] || $context['can_approve_posts'] ? '' : '
+			WHERE ' . ($pre_query ? 't.id_topic IN ({array_int:topic_list})' : (empty($global_topics) ? 't.id_board = {int:current_board}' : '(t.id_board = {int:current_board} OR is_global = {int:is_global})')) . (!$modSettings['postmod_active'] || $context['can_approve_posts'] ? '' : '
 				AND (t.approved = {int:is_approved}' . ($user_info['is_guest'] ? '' : ' OR t.id_member_started = {int:current_member}') . ')') . '
-			ORDER BY ' . ($pre_query ? 'FIND_IN_SET(t.id_topic, {string:find_set_topics})' : (!empty($modSettings['enableStickyTopics']) ? 'is_sticky' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . $_REQUEST['sort'] . ($ascending ? '' : ' DESC')) . '
+			ORDER BY ' . ($pre_query ? 'FIND_IN_SET(t.id_topic, {string:find_set_topics})' : (!empty($board_info['global_topics']) ? 'is_global' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . (!empty($modSettings['enableStickyTopics']) ? 'is_sticky' . ($fake_ascending ? '' : ' DESC') . ', ' : '') . $_REQUEST['sort'] . ($ascending ? '' : ' DESC')) . '
 			LIMIT ' . ($pre_query ? '' : '{int:start}, ') . '{int:maxindex}',
 			array(
 				'current_board' => $board,
 				'current_member' => $user_info['id'],
 				'topic_list' => $topic_ids,
 				'is_approved' => 1,
+				'is_global' => 1,
 				'find_set_topics' => implode(',', $topic_ids),
 				'start' => $start,
 				'maxindex' => $maxindex,
@@ -519,6 +545,7 @@ function MessageIndex()
 					'link' => '<a href="' . $scripturl . '?topic=' . $row['id_topic'] . ($user_info['is_guest'] ? ('.' . (!empty($options['view_newest_first']) ? 0 : ((int) (($row['num_replies']) / $context['pageindex_multiplier'])) * $context['pageindex_multiplier']) . '#msg' . $row['id_last_msg']) : (($row['num_replies'] == 0 ? '.0' : '.msg' . $row['id_last_msg']) . '#new')) . '" ' . ($row['num_replies'] == 0 ? '' : 'rel="nofollow"') . '>' . $row['last_subject'] . '</a>'
 				),
 				'is_sticky' => !empty($modSettings['enableStickyTopics']) && !empty($row['is_sticky']),
+				'is_global' => !empty($board_info['global_topics']) && !empty($row['is_global']),
 				'is_locked' => !empty($row['locked']),
 				'is_poll' => $modSettings['pollMode'] == '1' && $row['id_poll'] > 0,
 				'is_hot' => $row['num_replies'] >= $modSettings['hotTopicPosts'],
@@ -562,8 +589,11 @@ function MessageIndex()
 			);
 			while ($row = $smcFunc['db_fetch_assoc']($result))
 			{
-				$context['topics'][$row['id_topic']]['is_posted_in'] = true;
-				$context['topics'][$row['id_topic']]['class'] = 'my_' . $context['topics'][$row['id_topic']]['class'];
+				if (!$context['topics'][$row['id_topic']]['is_global'])
+				{
+					$context['topics'][$row['id_topic']]['is_posted_in'] = true;
+					$context['topics'][$row['id_topic']]['class'] = 'my_' . $context['topics'][$row['id_topic']]['class'];
+				}
 			}
 			$smcFunc['db_free_result']($result);
 		}

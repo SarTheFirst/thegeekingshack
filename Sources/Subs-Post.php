@@ -2406,6 +2406,8 @@ function modifyPost(&$msgOptions, &$topicOptions, &$posterOptions)
 
 	// This is longer than it has to be, but makes it so we only set/change what we have to.
 	$messages_columns = array();
+	if (isset($posterOptions['id']))
+		$messages_columns['id_member'] = $posterOptions['id'];
 	if (isset($posterOptions['name']))
 		$messages_columns['poster_name'] = $posterOptions['name'];
 	if (isset($posterOptions['email']))

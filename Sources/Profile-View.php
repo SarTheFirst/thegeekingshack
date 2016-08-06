@@ -68,13 +68,39 @@ if (!defined('SMF'))
 // View a summary.
 function summary($memID)
 {
-	global $context, $memberContext, $txt, $modSettings, $user_info, $user_profile, $sourcedir, $scripturl, $smcFunc;
+	global $context, $memberContext, $txt, $modSettings, $user_info, $user_profile, $sourcedir, $scripturl, $smcFunc, $settings;
 
 	// Attempt to load the member's profile data.
 	if (!loadMemberContext($memID) || !isset($memberContext[$memID]))
 		fatal_lang_error('not_a_user', false);
 
 	// Set up the stuff and load the user.
+	// Member Notepad
+	global $user_info;
+	if (allowedTo('admin_forum') || $memID == $user_info['id'])
+	{
+		$pad_notes = '';
+		
+		$result = $smcFunc['db_query']('', "SELECT value FROM {db_prefix}themes
+		 WHERE variable = 'notes' AND ID_MEMBER = $memID LIMIT 1");
+		if ($smcFunc['db_num_rows']($result) != 0)
+		{
+			$row =  $smcFunc['db_fetch_assoc']($result);
+			$pad_notes = $row['value'];
+		}
+		
+		$smcFunc['db_free_result']($result);
+		
+		$context['pad_notes'] = $pad_notes;
+		$context['show_pad'] = true;
+	}
+	else 
+	{
+		$context['show_pad'] = false;
+	}
+	
+	// End Member NotePad
+
 	$context += array(
 		'page_title' => sprintf($txt['profile_of_username'], $memberContext[$memID]['name']),
 		'can_send_pm' => allowedTo('pm_send'),
@@ -86,6 +112,192 @@ function summary($memID)
 
 	// Set a canonical URL for this page.
 	$context['canonical_url'] = $scripturl . '?action=profile;u=' . $memID;
+	
+	// Which template should we use?
+	if (@$context['member']['options']['customized_private'] == 1 && @$modSettings['enable_buddylist'] == 1) {
+			if ($context['member']['is_reverse_buddy'] || allowedTo('profile_extra_any') || $context['user']['is_owner'])
+				$view_customized = true;
+			else
+				$view_customized = false;
+	} else {
+		$view_customized = true;
+	}
+
+	if ((isset($context['member']['options']['customized']) && $context['member']['options']['customized'] == 1) || $modSettings['profile_enable_all'] == 1) {
+		if ($view_customized) {
+			loadTemplate('UltimateProfile');
+			$context['sub_template'] = 'summary2';
+		}
+	}
+	
+	// Output user's customization code.		
+	$context['html_headers'] .= '
+	<style type="text/css">
+		.creator dl {
+			margin: 0;
+		}
+		.creator dt {
+			width: 40%;
+			float: left;
+			clear: both;
+			margin: 0 0 10px 0;
+		}
+		.creator dd {
+			float: left;
+			width: 60%;
+			margin: 0 0 10px 0;
+		}
+	</style>';
+	
+	// For avatars: if we're always html resizing, assume it's too large.
+	if ($modSettings['avatar_action_too_large'] == 'option_html_resize' || $modSettings['avatar_action_too_large'] == 'option_js_resize') {
+		$avatar_width = !empty($modSettings['avatar_max_width_external']) ? ' width="' . $modSettings['avatar_max_width_external'] . '"' : '';
+		$avatar_height = !empty($modSettings['avatar_max_height_external']) ? ' height="' . $modSettings['avatar_max_height_external'] . '"' : '';
+	} else {
+		$avatar_width = '';
+		$avatar_height = '';
+	}
+
+	// Prepare the buddy list.
+	if (isset($modSettings['enable_buddylist']) && $modSettings['enable_buddylist'] == '1') {
+		$buddies = array();
+		
+		if (in_array(@$context['member']['options']['num_shown_buddies'], array(3, 6, 9, 12)))
+			$number = $context['member']['options']['num_shown_buddies'];
+		else
+			$number = $modSettings['profile_buddies_shown'];
+		
+		$request = $smcFunc['db_query']('', '
+			SELECT buddy_id
+			FROM {db_prefix}buddies 
+			WHERE id_member = {int:id_member}
+				AND approved = 1
+			ORDER BY position ASC, time_updated DESC
+			LIMIT 0, {int:num_limit}',
+			array(
+				'id_member' => $context['member']['id'],
+				'num_limit' => $number
+			)
+		);
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$buddies[] = $row['buddy_id'];
+			
+		loadMemberData($buddies);
+		foreach ($buddies as $buddy) {
+			$user_data = $user_profile[$buddy];
+			$user_data['avatar_image'] = $user_data['avatar'] == '' ? ($user_data['id_attach'] > 0 ? '<img src="' . (empty($user_data['attachment_type']) ? $scripturl . '?action=dlattach;attach=' . $user_data['id_attach'] . ';type=avatar' : $modSettings['custom_avatar_url'] . '/' . $user_data['filename']) . '" alt="" class="avatar" border="0" />' : '') : (stristr($user_data['avatar'], 'http://') ? '<img src="' . $user_data['avatar'] . '"' . $avatar_width . $avatar_height . ' alt="" class="avatar" border="0" />' : '<img src="' . $modSettings['avatar_url'] . '/' . htmlspecialchars($user_data['avatar']) . '" alt="" class="avatar" border="0" />');
+			$user_data['is_online'] = (!empty($user_data['show_online']) || allowedTo('moderate_forum')) && $user_data['is_online'] > 0;
+			
+			if ($buddy != $memID)
+				$context['member']['buddies_data'][$buddy] = $user_data;
+		}
+	}
+	
+	// Profile pictures.
+	if ($modSettings['profile_enable_pictures'] == 1) {
+		
+		// Stupid differences... MySQL uses RAND(), SQLite and PostgreSQL RANDOM()
+		global $db_type;
+		if ($db_type == 'mysql')
+			$rand = 'RAND()';
+		else
+			$rand = 'RANDOM()';
+		
+		$request = $smcFunc['db_query']('', '
+			SELECT id_picture, time, title, filename 
+			FROM {db_prefix}profile_pictures 
+			WHERE id_member = {int:id_member}
+			ORDER BY ' . $rand . ' 
+			LIMIT 6',
+			array(
+				'id_member' => $memID,
+			)
+		);
+		while ($picture = $smcFunc['db_fetch_assoc']($request)) {
+			$context['pictures'][] = array(
+				'ID_PICTURE' => $picture['id_picture'],
+				'title' => $picture['title'],
+				'url' => $scripturl . '?action=profile;area=pictures;u=' . $memID . ';view=' . $picture['id_picture'],
+				'thumb' => $modSettings['profile_pictures_url'] . '/' . $memID . '_' . $picture['time'] . '_thumb.' . get_extension ($picture['filename']),
+				'time' => timeformat($picture['time']),
+			);
+		}
+		
+		if (@$context['member']['options']['pictures_budd_only'] == 1 && @$modSettings['enable_buddylist'] == 1) {
+			if ($context['member']['is_reverse_buddy'] || allowedTo('profile_extra_any') || $context['user']['is_owner'])
+				$context['can_view_pics'] = true;
+			else
+				$context['can_view_pics'] = false;
+		} else
+			$context['can_view_pics'] = true;
+	}
+	
+	
+	// Prepare and load comments.
+	$request = $smcFunc['db_query']('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}profile_comments 
+		WHERE comment_member_id = {int:id_member}',
+		array(
+			'id_member' => $memID,
+		)
+	);
+	list($commentCount) = $smcFunc['db_fetch_row']($request);
+	$smcFunc['db_free_result']($request);
+
+	$maxComments = 10; // Hard-coded; should this be configurable?
+
+	// Make sure the starting place makes sense and construct our friend the page index.
+	$context['start'] = (int)$_REQUEST['start'];
+	$context['page_index'] = constructPageIndex($scripturl . '?action=profile;u=' . $memID, $context['start'], $commentCount, $maxComments, false);
+	$context['current_page'] = $context['start'] / $maxComments;
+	$context['current_member'] = $memID;
+	$context['can_delete'] = allowedTo('profile_extra_any') || ($context['user']['is_owner'] && allowedTo('profile_extra_own'));
+		
+	$request = $smcFunc['db_query']('', '
+		SELECT com.id_comment, com.id_member, com.comment, com.time, mem.real_name, mem.show_online,
+			IFNULL(lo.log_time, 0) AS is_online, IFNULL(a.id_attach, 0) AS id_attach, a.filename, a.attachment_type, mem.avatar
+		FROM {db_prefix}profile_comments as com
+			LEFT JOIN {db_prefix}members AS mem ON (com.id_member = mem.id_member)
+			LEFT JOIN {db_prefix}log_online AS lo ON (lo.id_member = com.id_member)
+			LEFT JOIN {db_prefix}attachments AS a ON (a.id_member = com.id_member)
+		WHERE com.comment_member_id = {int:id_member}
+		ORDER BY id_comment DESC 
+		LIMIT {int:start}, {int:maxindex}',
+		array(
+			'id_member' => $memID,
+			'start' => $context['start'],
+			'maxindex' => $maxComments,
+		)
+	);
+	
+	while ($row = $smcFunc['db_fetch_assoc']($request)) {
+		censorText($row['comment']);
+		
+		$row['is_online'] = (!empty($row['show_online']) || allowedTo('moderate_forum')) && $row['is_online'] > 0;
+		
+		$context['comments'][] = array(
+			'body' => parse_bbc($row['comment']),
+			'author' => array(
+				'real_name' => $row['real_name'],
+				'id_member' => $row['id_member'],
+				'avatar' => $row['avatar'] == '' ? ($row['id_attach'] > 0 ? '<img src="' . (empty($row['attachment_type']) ? $scripturl . '?action=dlattach;attach=' . $row['id_attach'] . ';type=avatar' : $modSettings['custom_avatar_url'] . '/' . $row['filename']) . '" alt="" class="avatar" border="0" />' : '') : (stristr($row['avatar'], 'http://') ? '<img src="' . $row['avatar'] . '"' . $avatar_width . $avatar_height . ' alt="" class="avatar" border="0" />' : '<img src="' . $modSettings['avatar_url'] . '/' . htmlspecialchars($row['avatar']) . '" alt="" class="avatar" border="0" />'),
+				'online' => array(
+					'is_online' => $row['is_online'],
+					'text' => &$txt[$row['is_online'] ? 'online' : 'offline'],
+					'href' => $scripturl . '?action=pm;sa=send;u=' . $row['id_member'],
+					'link' => '<a href="' . $scripturl . '?action=pm;sa=send;u=' . $row['id_member'] . '">' . $txt[$row['is_online'] ? 'online' : 'offline'] . '</a>',
+					'image_href' => $settings['images_url'] . '/' . ($row['is_online'] ? 'useron' : 'useroff') . '.gif',
+					'label' => &$txt[$row['is_online'] ? 'pm_online' : 'pm_offline']
+				),
+			),
+			'time' => timeformat($row['time']),
+			'reply' => $scripturl . '?action=profile;area=comment;u=' . $row['id_member'] . '',
+			'delete' => $scripturl . '?action=profile;area=comment;u=' . $memID . ';delete=' . $row['id_comment'] . ';sesc=' . $context['session_id'],
+		);
+		
+	}
+	$smcFunc['db_free_result']($request);
 
 	// Are there things we don't show?
 	$context['disabled_fields'] = isset($modSettings['disabled_profile_fields']) ? array_flip(explode(',', $modSettings['disabled_profile_fields'])) : array();
@@ -105,6 +317,26 @@ function summary($memID)
 		$context['member']['posts_per_day'] = $txt['not_applicable'];
 	else
 		$context['member']['posts_per_day'] = comma_format($context['member']['real_posts'] / $days_registered, 3);
+
+	if (!$context['member']['is_subaccount'] && !empty($context['member']['subaccounts']))
+	{
+		$request = $smcFunc['db_query']('', '
+			SELECT sum(posts)
+			FROM {db_prefix}members
+			WHERE id_member IN ({array_int:members})',
+			array(
+				'members' => array_merge(array($context['member']['id']), array_keys($context['member']['subaccounts'])),
+			)
+		);
+
+		list($context['member']['subaccounts_posts']) = $smcFunc['db_fetch_row']($request);
+		$smcFunc['db_free_result']($request);
+
+		if (empty($user_profile[$memID]['date_registered']) || $days_registered < 1)
+			$context['member']['subaccounts_posts_per_day'] = $txt['not_applicable'];
+		else
+			$context['member']['subaccounts_posts_per_day'] = comma_format($context['member']['subaccounts_posts'] / $days_registered, 3);
+	}
 
 	// Set the age...
 	if (empty($context['member']['birth_date']))
@@ -1953,6 +2185,46 @@ function viewWarning($memID)
 	foreach ($context['level_effects'] as $limit => $dummy)
 		if ($context['member']['warning'] >= $limit)
 			$context['current_level'] = $limit;
+}
+
+function buddies($memID)
+{
+	global $modSettings, $context, $smcFunc, $user_profile, $scripturl;
+	
+	// For avatars: if we're always html resizing, assume it's too large.
+	if ($modSettings['avatar_action_too_large'] == 'option_html_resize' || $modSettings['avatar_action_too_large'] == 'option_js_resize') {
+		$avatar_width = !empty($modSettings['avatar_max_width_external']) ? ' width="' . $modSettings['avatar_max_width_external'] . '"' : '';
+		$avatar_height = !empty($modSettings['avatar_max_height_external']) ? ' height="' . $modSettings['avatar_max_height_external'] . '"' : '';
+	} else {
+		$avatar_width = '';
+		$avatar_height = '';
+	}
+		
+	if (isset($modSettings['enable_buddylist']) && $modSettings['enable_buddylist'] == '1') {
+		$buddies = array();
+		$request = $smcFunc['db_query']('', '
+			SELECT buddy_id 
+			FROM {db_prefix}buddies 
+			WHERE id_member = {int:id_member}
+				AND approved = 1 
+			ORDER BY position ASC, time_updated DESC',
+			array(
+				'id_member' => $memID,
+			)
+		);
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$buddies[] = $row['buddy_id'];
+			
+		loadMemberData($buddies);
+		foreach ($buddies as $buddy) {
+			$user_data = $user_profile[$buddy];
+			$user_data['avatar_image'] = $user_data['avatar'] == '' ? ($user_data['id_attach'] > 0 ? '<img src="' . (empty($user_data['attachment_type']) ? $scripturl . '?action=dlattach;attach=' . $user_data['id_attach'] . ';type=avatar' : $modSettings['custom_avatar_url'] . '/' . $user_data['filename']) . '" alt="" class="avatar" border="0" />' : '') : (stristr($user_data['avatar'], 'http://') ? '<img src="' . $user_data['avatar'] . '"' . $avatar_width . $avatar_height . ' alt="" class="avatar" border="0" />' : '<img src="' . $modSettings['avatar_url'] . '/' . htmlspecialchars($user_data['avatar']) . '" alt="" class="avatar" border="0" />');
+			$user_data['is_online'] = (!empty($user_data['show_online']) || allowedTo('moderate_forum')) && $user_data['is_online'] > 0;
+			
+			if ($buddy != $memID)
+				$context['member']['buddies_data'][$buddy] = $user_data;
+		}
+	}
 }
 
 ?>

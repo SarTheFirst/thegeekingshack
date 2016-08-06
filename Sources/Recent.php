@@ -666,7 +666,7 @@ function UnreadTopics()
 	// This part is the same for each query.
 	$select_clause = '
 				ms.subject AS first_subject, ms.poster_time AS first_poster_time, ms.id_topic, t.id_board, b.name AS bname,
-				t.num_replies, t.num_views, ms.id_member AS id_first_member, ml.id_member AS id_last_member,
+				t.num_replies, t.num_views, ms.id_member AS id_first_member, ml.id_member AS id_last_member, t.is_global,
 				ml.poster_time AS last_poster_time, IFNULL(mems.real_name, ms.poster_name) AS first_poster_name,
 				IFNULL(meml.real_name, ml.poster_name) AS last_poster_name, ml.subject AS last_subject,
 				ml.icon AS last_icon, ms.icon AS first_icon, t.id_poll, t.is_sticky, t.locked, ml.modified_time AS last_modified_time,
@@ -1267,6 +1267,7 @@ function UnreadTopics()
 			'href' => $scripturl . '?topic=' . $row['id_topic'] . ($row['num_replies'] == 0 ? '.0' : '.msg' . $row['new_from']) . ';topicseen' . ($row['num_replies'] == 0 ? '' : 'new'),
 			'link' => '<a href="' . $scripturl . '?topic=' . $row['id_topic'] . ($row['num_replies'] == 0 ? '.0' : '.msg' . $row['new_from']) . ';topicseen#msg' . $row['new_from'] . '" rel="nofollow">' . $row['first_subject'] . '</a>',
 			'is_sticky' => !empty($modSettings['enableStickyTopics']) && !empty($row['is_sticky']),
+			'is_global' => !empty($row['is_global']),
 			'is_locked' => !empty($row['locked']),
 			'is_poll' => $modSettings['pollMode'] == '1' && $row['id_poll'] > 0,
 			'is_hot' => $row['num_replies'] >= $modSettings['hotTopicPosts'],
@@ -1310,7 +1311,8 @@ function UnreadTopics()
 			if (empty($context['topics'][$row['id_topic']]['is_posted_in']))
 			{
 				$context['topics'][$row['id_topic']]['is_posted_in'] = true;
-				$context['topics'][$row['id_topic']]['class'] = 'my_' . $context['topics'][$row['id_topic']]['class'];
+				if (strpos($context['topics'][$row['id_topic']]['class'], 'global') === false)
+					$context['topics'][$row['id_topic']]['class'] = 'my_' . $context['topics'][$row['id_topic']]['class'];
 			}
 		}
 		$smcFunc['db_free_result']($result);

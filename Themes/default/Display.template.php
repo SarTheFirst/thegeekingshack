@@ -12,7 +12,7 @@
 
 function template_main()
 {
-	global $context, $settings, $options, $txt, $scripturl, $modSettings;
+	global $context, $settings, $options, $txt, $scripturl, $modSettings, $user_info;
 
 	// Let them know, if their report was a success!
 	if ($context['report_sent'])
@@ -651,6 +651,7 @@ function template_main()
 		'delete' => array('test' => 'can_delete', 'text' => 'remove_topic', 'image' => 'admin_rem.gif', 'lang' => true, 'custom' => 'onclick="return confirm(\'' . $txt['are_sure_remove_topic'] . '\');"', 'url' => $scripturl . '?action=removetopic2;topic=' . $context['current_topic'] . '.0;' . $context['session_var'] . '=' . $context['session_id']),
 		'lock' => array('test' => 'can_lock', 'text' => empty($context['is_locked']) ? 'set_lock' : 'set_unlock', 'image' => 'admin_lock.gif', 'lang' => true, 'url' => $scripturl . '?action=lock;topic=' . $context['current_topic'] . '.' . $context['start'] . ';' . $context['session_var'] . '=' . $context['session_id']),
 		'sticky' => array('test' => 'can_sticky', 'text' => empty($context['is_sticky']) ? 'set_sticky' : 'set_nonsticky', 'image' => 'admin_sticky.gif', 'lang' => true, 'url' => $scripturl . '?action=sticky;topic=' . $context['current_topic'] . '.' . $context['start'] . ';' . $context['session_var'] . '=' . $context['session_id']),
+		'global' => array('test' => 'can_global', 'text' => empty($context['is_global']) ? 'global_topic' : 'not_global_topic', 'image' => 'admin_global.gif', 'lang' => true, 'url' => $scripturl . '?action=global;topic=' . $context['current_topic'] . '.' . $context['start'] . ';' . $context['session_var'] . '=' . $context['session_id']),
 		'merge' => array('test' => 'can_merge', 'text' => 'merge', 'image' => 'merge.gif', 'lang' => true, 'url' => $scripturl . '?action=mergetopics;board=' . $context['current_board'] . '.0;from=' . $context['current_topic']),
 		'calendar' => array('test' => 'calendar_post', 'text' => 'calendar_link', 'image' => 'linktocal.gif', 'lang' => true, 'url' => $scripturl . '?action=post;calendar;msg=' . $context['topic_first_message'] . ';topic=' . $context['current_topic'] . '.0'),
 	);
@@ -718,7 +719,21 @@ function template_main()
 							<div class="quickReplyContent">
 								<textarea cols="600" rows="7" name="message" tabindex="', $context['tabindex']++, '"></textarea>
 							</div>
-							<div class="righttext padding">
+							<div class="righttext padding">';
+			if (!empty($user_info['subaccounts']))
+			{
+				echo '
+					<strong>', $txt['use_subaccount'], ':</strong> <select name="subaccount">
+						<option value="', $user_info['id'], '" selected="selected">', $user_info['name'], '</option>';
+				foreach($user_info['subaccounts'] as $account)
+					echo '
+						<option value="', $account['id'], '">', $account['name'], '</option>';
+				echo '
+					</select>';
+			}
+
+			echo '
+
 								<input type="submit" name="post" value="', $txt['post'], '" onclick="return submitThisOnce(this);" accesskey="s" tabindex="', $context['tabindex']++, '" class="button_submit" />
 								<input type="submit" name="preview" value="', $txt['preview'], '" onclick="return submitThisOnce(this);" accesskey="p" tabindex="', $context['tabindex']++, '" class="button_submit" />';
 

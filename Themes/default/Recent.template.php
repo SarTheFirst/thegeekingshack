@@ -166,6 +166,9 @@ function template_unread()
 				$color_class = 'stickybg';
 			if (strpos($topic['class'], 'locked') !== false)
 				$color_class .= 'lockedbg';
+			elseif ($topic['is_global'])
+				$color_class = 'global';
+
 
 			$color_class2 = !empty($color_class) ? $color_class . '2' : '';
 
@@ -350,6 +353,9 @@ function template_replies()
 				$color_class = 'stickybg';
 			if (strpos($topic['class'], 'locked') !== false)
 				$color_class .= 'lockedbg';
+			elseif ($topic['is_global'])
+				$color_class = 'global';
+
 
 			$color_class2 = !empty($color_class) ? $color_class . '2' : '';
 

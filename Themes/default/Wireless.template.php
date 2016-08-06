@@ -385,6 +385,9 @@ function template_imode_display()
 		if ($context['can_sticky'])
 			echo '
 				<tr><td><a href="', $scripturl, '?action=sticky;topic=', $context['current_topic'], '.', $context['start'], ';', $context['session_var'], '=', $context['session_id'], ';imode">', $txt['wireless_display_' . ($context['is_sticky'] ? 'unsticky' : 'sticky')], '</a></td></tr>';
+		if ($context['can_global'])
+			echo '
+				<tr><td><a href="', $scripturl, '?action=global;topic=', $context['current_topic'], '.', $context['start'], ';', $context['session_var'], '=', $context['session_id'], ';imode">', $txt['wireless_display_' . ($context['is_global'] ? 'unglobal' : 'global')], '</a></td></tr>';
 		if ($context['can_lock'])
 			echo '
 				<tr><td><a href="', $scripturl, '?action=lock;topic=', $context['current_topic'], '.', $context['start'], ';', $context['session_var'], '=', $context['session_id'], ';imode">', $txt['wireless_display_' . ($context['is_locked'] ? 'unlock' : 'lock')], '</a></td></tr>';

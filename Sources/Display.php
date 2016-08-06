@@ -179,7 +179,7 @@ function Display()
 	// Get all the important topic info.
 	$request = $smcFunc['db_query']('', '
 		SELECT
-			t.num_replies, t.num_views, t.locked, ms.subject, t.is_sticky, t.id_poll,
+			t.num_replies, t.num_views, t.locked, ms.subject, t.is_global, t.is_sticky, t.id_poll,
 			t.id_member_started, t.id_first_msg, t.id_last_msg, t.approved, t.unapproved_posts,
 			' . ($user_info['is_guest'] ? 't.id_last_msg + 1' : 'IFNULL(lt.id_msg, IFNULL(lmr.id_msg, -1)) + 1') . ' AS new_from
 			' . (!empty($modSettings['recycle_board']) && $modSettings['recycle_board'] == $board ? ', id_previous_board, id_previous_topic' : '') . '
@@ -512,6 +512,7 @@ function Display()
 	// Information about the current topic...
 	$context['is_locked'] = $topicinfo['locked'];
 	$context['is_sticky'] = $topicinfo['is_sticky'];
+	$context['is_global'] = $topicinfo['is_global'];
 	$context['is_very_hot'] = $topicinfo['num_replies'] >= $modSettings['hotTopicVeryPosts'];
 	$context['is_hot'] = $topicinfo['num_replies'] >= $modSettings['hotTopicPosts'];
 	$context['is_approved'] = $topicinfo['approved'];
@@ -1020,6 +1021,7 @@ function Display()
 		'can_approve' => 'approve_posts',
 		'can_ban' => 'manage_bans',
 		'can_sticky' => 'make_sticky',
+		'can_global' => 'make_global',
 		'can_merge' => 'merge_any',
 		'can_split' => 'split_any',
 		'calendar_post' => 'calendar_post',
@@ -1049,6 +1051,7 @@ function Display()
 		$context[$contextual] = allowedTo($perm . '_any') || ($context['user']['started'] && allowedTo($perm . '_own'));
 
 	// Cleanup all the permissions with extra stuff...
+	$context['can_global'] &= !empty($board_info['global_topics']);
 	$context['can_mark_notify'] &= !$context['user']['is_guest'];
 	$context['can_sticky'] &= !empty($modSettings['enableStickyTopics']);
 	$context['calendar_post'] &= !empty($modSettings['cal_enabled']);
@@ -1075,7 +1078,7 @@ function Display()
 	// Wireless shows a "more" if you can do anything special.
 	if (WIRELESS && WIRELESS_PROTOCOL != 'wap')
 	{
-		$context['wireless_more'] = $context['can_sticky'] || $context['can_lock'] || allowedTo('modify_any');
+		$context['wireless_more'] = $context['can_sticky'] || $context['can_lock'] || allowedTo('modify_any') || $context['can_global'];
 		$context['wireless_moderate'] = isset($_GET['moderate']) ? ';moderate' : '';
 	}
 

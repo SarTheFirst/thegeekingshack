@@ -70,6 +70,161 @@ function activateAccount($memID)
 	redirectexit('action=profile;u=' . $memID . ';area=summary');
 }
 
+function comment($memID)
+{
+	global $context, $smcFunc, $txt, $sourcedir, $language, $modSettings, $scripturl;
+	
+	// Guests ar not allowed to comment.
+	is_not_guest();
+	
+	if (isset($_GET['add'])) {
+		if (empty($_POST['comment']))
+			fatal_error($txt['profile_comment_field'], false);
+		
+		// Integration with AEVA mod (Thanks Nao ;))
+		if (isset($modSettings['aeva_enable']) && file_exists($sourcedir . '/Subs-Aeva.php')) {
+			@include_once($sourcedir . '/Subs-Aeva.php');
+			if (function_exists('aeva_onposting'))
+				$_POST['comment'] = aeva_onposting($_POST['comment']);
+		}
+		
+		checkSession('post');
+		
+		// Only buddies can post comments? 
+		require_once $sourcedir . '/Profile-Modify.php';
+		loadThemeOptions($memID);
+		if (isset($context['member']['options']['comments_budd_only']) && $context['member']['options']['comments_budd_only'] == 1) {
+			if (!is_buddy($memID, $context['user']['id']) && !allowedTo('profile_extra_any'))
+				fatal_error($txt['profile_comments_buddies_only'], false);
+		}
+		
+		$request = $smcFunc['db_insert']('normal', '{db_prefix}profile_comments',
+				array(
+					'id_member' => 'int',
+					'comment' => 'string',
+					'time' => 'int',
+					'comment_member_id' => 'int',
+				),
+				array(
+					'id_member' => $context['user']['id'],
+					'comment' => htmlspecialchars($_POST['comment']),
+					'time' => time(),
+					'comment_member_id' => $memID,
+				),
+				array('id_comment')
+		);
+		
+		// Should we notify user?
+		if (@$context['member']['options']['comments_notif_disable'] != 1 && $context['user']['id'] != $memID) {
+			$request = $smcFunc['db_query']('', '
+				SELECT lngfile 
+				FROM {db_prefix}members 
+				WHERE id_member = {int:id_member}',
+				array(
+					'id_member' => $memID,
+				)
+			);
+			list($user_language) = $smcFunc['db_fetch_row']($request);
+			
+			loadLanguage('UltimateProfile', empty($user_language) || empty($modSettings['userLanguage']) ? $language : $user_language, false);
+			
+			require_once $sourcedir . '/Subs-Post.php';
+			sendpm(array('to' => array($memID), 'bcc' => array()), sprintf($txt['profile_notif_com_subject'], $context['user']['name']), sprintf($txt['profile_notif_com_body'], $context['user']['name'], $scripturl . '?action=profile'), false, array('id' => 0, 'name' => $txt['profile_notif_com_user'], 'username' => $txt['profile_notif_com_user']));
+		}
+			
+		redirectexit('action=profile;u=' . $memID);
+		
+	} elseif (isset($_GET['delete'])) {
+		checkSession('get');
+		
+		$allowed = false;
+		
+		if (allowedTo('profile_extra_any'))
+			$allowed = true;
+		elseif ($context['user']['is_owner'] && allowedTo('profile_extra_own')) {
+			// Are you deleting comment that is on your own profile?
+			$request = $smcFunc['db_query']('', '
+					SELECT comment_member_id 
+					FROM {db_prefix}profile_comments 
+					WHERE id_comment = {int:delete}',
+					array(
+						'delete' => (int)$_GET['delete'],
+					)
+			);
+			list($user_id) = $smcFunc['db_fetch_row']($request);
+			
+			if ($context['user']['id'] == $user_id)
+				$allowed = true;
+		}
+		
+		if ($allowed)
+			$smcFunc['db_query']('', '
+				DELETE FROM {db_prefix}profile_comments 
+				WHERE id_comment = {int:delete}',
+				array(
+					'delete' => (int)$_GET['delete'],
+				)
+			);
+		
+		redirectexit('action=profile;u=' . $memID);
+		
+	} else {
+		// Only buddies can post comments? 
+		require_once $sourcedir . '/Profile-Modify.php';
+		loadThemeOptions($memID);
+		if (isset($context['member']['options']['comments_budd_only']) && $context['member']['options']['comments_budd_only'] == 1) {
+			if (!is_buddy ($memID, $context['user']['id']) && !allowedTo('edit_ultimate_profile_any'))
+				fatal_error($txt['profile_comments_buddies_only'], false);
+		}
+		$context['sub_template'] = 'add_comment';
+	}
+	
+}
+
+function report($memID)
+{
+	global $context, $txt, $scripturl, $smcFunc, $user_info, $modSettings, $sourcedir, $language;
+	
+	is_not_guest();
+	
+	if ($memID == $context['user']['id'])
+		fatal_lang_error('profile_report_own', false);
+		
+	if (isset($_POST['sc']) || isset($_POST['submit'])) {
+		checkSession();
+		spamProtection('spam');
+		
+		$reporterName = un_htmlspecialchars($user_info['name']) . ($user_info['name'] != $user_info['username'] && $user_info['username'] != '' ? ' (' . $user_info['username'] . ')' : '');
+		require_once($sourcedir . '/Subs-Post.php');
+		
+		// Find all of this forum's administrators.
+		$request = $smcFunc['db_query']('', '
+			SELECT id_member, email_address, lngfile
+			FROM {db_prefix}members
+			WHERE id_group = 1 OR FIND_IN_SET(1, additional_groups) 
+				AND notify_types != 4
+			ORDER BY lngfile');
+		
+		// Send every moderator an email.
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+		{
+			loadLanguage('UltimateProfile', empty($row['lngfile']) || empty($modSettings['userLanguage']) ? $language : $row['lngfile'], false);
+	
+			// Send it to the administrator.
+			sendmail($row['email_address'], $txt['profile_report_subject'] . ': ' . $context['member']['name'],
+				sprintf($txt['profile_report_email1'], $context['member']['name']) . $txt['profile_report_email2'] . ' ' . (empty($context['user']['id']) ? $txt['guest'] . ' (' . $user_info['ip'] . ')' : $reporterName) . ' ' . $txt['profile_report_email3'] . ":\n\n" .
+				$scripturl . '?action=profile;u=' . $context['member']['id'] . "\n\n" .
+				$txt['profile_report_comment'] . ":\n" .
+				$_POST['comment'] . "\n\n" .
+				$txt['regards_team'], $user_info['email']);
+		}
+		$smcFunc['db_free_result']($request);
+		redirectexit();
+	}
+	
+	$context['sub_template'] = 'report_profile';
+}
+
 // Issue/manage a users warning status.
 function issueWarning($memID)
 {

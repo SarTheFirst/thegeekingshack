@@ -211,13 +211,12 @@ function template_body_above()
 		echo '
 		<ul>
 			<li><a href="', empty($settings['link_top1_url']) ? '' : '' . $settings['link_top1_url'] . '', '">', empty($settings['link_top1']) ? $txt['link_top1'] : $settings['link_top1'], '</a></li>
-			<li><a href="', empty($settings['link_top2_url']) ? '' : '' . $settings['link_top2_url'] . '', '">', empty($settings['link_top2']) ? $txt['link_top2'] : $settings['link_top2'], '</a></li>
-			<li><a href="', empty($settings['link_top3_url']) ? '' : '' . $settings['link_top3_url'] . '', '">', empty($settings['link_top3']) ? $txt['link_top3'] : $settings['link_top3'], '</a></li>
-			<li><a href="', empty($settings['link_top4_url']) ? '' : '' . $settings['link_top4_url'] . '', '">', empty($settings['link_top4']) ? $txt['link_top4'] : $settings['link_top4'], '</a></li>
-			<li><a href="', empty($settings['link_top5_url']) ? '' : '' . $settings['link_top5_url'] . '', '">', empty($settings['link_top5']) ? $txt['link_top5'] : $settings['link_top5'], '</a></li>
 		</ul>', !empty($settings['forum_width']) ? '
 		</div>' : '';
 	echo '
+		<div style="float:right;margin-right:5%;">
+<iframe src="http://free.timeanddate.com/clock/i5beujko/n419/fn2/fc0a3757/tct/pct/tt0/tw0/tm1/th2/ta1/tb2" frameborder="0" width="236" height="21" allowTransparency="true"></iframe>
+		</div>
 	</div>';
 	
 	echo '
@@ -227,6 +226,7 @@ function template_body_above()
 			<h1 class="forumtitle" style="color:#eee;">The Geeking Shack';
 				// <a href="', $scripturl, '">', empty($context['header_logo_url_html_safe']) ? '<img src="' . $settings['images_url'] . '/theme/logo.png" alt="' . $context['forum_name'] . '" />' : '<img src="' . $context['header_logo_url_html_safe'] . '" alt="' . $context['forum_name'] . '" />', '</a>
 			echo '</h1>
+
 			<div class="user">';
 
 	// If the user is logged in, display stuff like their name, new messages, etc.
@@ -274,11 +274,14 @@ function template_body_above()
 				</div>', !empty($settings['forum_width']) ? '
 		</div>' : '';
 
-	echo '
-		<br class="clear" />
+	// echo '
+	// <div style="margin: 15px 60px 0px; text-align: center; width: 200px;"><noscript><div style="display: inline-block; padding: 2px 4px; margin: 0px 0px 5px; border: 1px solid rgb(204, 204, 204); text-align: center; background-color: transparent;"><a href="http://localtimes.info/North_America/United_States/Maryland/Baltimore/" style="text-decoration: none; font-size: 13px; color: rgb(238, 238, 238);"><img src="http://localtimes.info/images/countries/us.png"="" border=0="" style="border:0;margin:0;padding:0"=""> Baltimore</a></div></noscript>
+	// 	<script type="text/javascript" src="http://localtimes.info/clock.php?continent=North America&country=United States&province=Maryland&city=Baltimore&cp1_Hex=eeeeee&cp2_Hex=FFFFFF&cp3_Hex=000000&fwdt=200&ham=0&hbg=1&hfg=0&sid=0&mon=0&wek=0&wkf=1&sep=0&widget_number=1100"></script></div>
+		// echo '<iframe src="http://free.timeanddate.com/clock/i5beujko/n419/fn11/fs16/fceee/tct/pct/pa8/tt0/tw0/tm1/th2/ta1/tb2" frameborder="0" width="242" height="35" allowTransparency="true"></iframe>';
+		echo'<br class="clear" />
 	</div>';
 	
-	
+	echo '';
 	// We have to show the search box?
 	if(!empty($settings['searchbox_enable']))
 	{
@@ -417,7 +420,7 @@ function template_menu()
 	global $context, $settings, $options, $scripturl, $txt;
 
 	echo '
-	   <div id="content_mainmenu">
+		<div id="content_mainmenu">
 		<div id="main_menu">
 			<ul class="dropmenu2 custommenu" id="menu_nav">';
 
