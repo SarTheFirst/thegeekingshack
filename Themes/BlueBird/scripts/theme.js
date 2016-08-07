@@ -94,4 +94,32 @@ var smf_addListItemHoverEvents = function()
 // Add hover events to list items if the browser requires it.
 if (is_ie7down && 'attachEvent' in window)
 	window.attachEvent('onload', smf_addListItemHoverEvents);
+
+
+// Dynamic clock at top of page
+function startClock() {
+	var timestamp = parseInt(document.getElementById("time").innerHTML)
+	var today = new Date(timestamp);
+	var day = padTime(today.getDate());
+	var month = today.getMonth();
+	var year = today.getFullYear();
+	var hours = padTime(today.getHours() % 12);
+	var minutes = padTime(today.getMinutes());
+	var seconds = padTime(today.getSeconds());
+	var meridian = (today.getHours < 12 ? "am" : "pm");
 	
+	var months = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+	
+	document.getElementById("clock").innerHTML = 
+	day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " ET";
+	
+	document.getElementById("time").innerHTML = timestamp + 500;
+	var t = setTimeout(startClock, 500);
+}
+
+function padTime(i) {
+	if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+	return i;
+}
+
+addLoadEvent(startClock);

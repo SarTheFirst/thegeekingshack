@@ -4012,6 +4012,13 @@ span.hidelink
     color: #333333;
     text-decoration:none;
 }
+
+#menu #clock {
+    float: right;
+    color: #656565;
+    padding: 5px 20px;
+    margin-right: 5%;
+}
 /* custom menu */
 .custommenu li a.active,
 .custommenu li a.active span.firstlevel,

@@ -214,9 +214,8 @@ function template_body_above()
 		</ul>', !empty($settings['forum_width']) ? '
 		</div>' : '';
 	echo '
-		<div style="float:right;margin-right:5%;">
-<iframe src="http://free.timeanddate.com/clock/i5beujko/n419/fn2/fc0a3757/tct/pct/tt0/tw0/tm1/th2/ta1/tb2" frameborder="0" width="236" height="21" allowTransparency="true"></iframe>
-		</div>
+		<div id="time" style="display: none;">', time() * 1000, '</div>
+		<div id="clock"></div>
 	</div>';
 	
 	echo '
