@@ -1186,7 +1186,7 @@ span.lowerframe span
 ------------------------------------------------------- */
 #content_mainmenu
 {
-	background: #FFF url(../images/theme/spritemenu.png) repeat-x top left;
+	background: #FFF /* url(../images/theme/spritemenu.png) Note: PNG missing from filesystem */ repeat-x top left;
 	height: 68px;
 }
 
