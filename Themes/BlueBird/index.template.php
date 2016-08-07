@@ -86,7 +86,7 @@ function template_html_above()
 
 	// The ?fin20 part of this link is just here to make sure browsers don't cache it wrongly.
 	echo '
-	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/index', $context['theme_variant'], '.css?fin20" />';
+	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/index', $context['theme_variant'], '.css?fin23" />';
 
 	// Some browsers need an extra stylesheet due to bugs/compatibility issues.
 	foreach (array('ie7', 'ie6', 'webkit') as $cssfix)
@@ -117,7 +117,7 @@ function template_html_above()
 		);
 	</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/script.js?fin20"></script>
-	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin20"></script>
+	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin24"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		var smf_theme_url = "', $settings['theme_url'], '";
 		var smf_default_theme_url = "', $settings['default_theme_url'], '";
@@ -214,11 +214,15 @@ function template_body_above()
 		</ul>', !empty($settings['forum_width']) ? '
 		</div>' : '';
 	echo '
-		<div id="time" style="display: none;">', time() * 1000, '</div>
-		<div id="clock"></div>
-	</div>';
+		<div id="clock">
+			<div id="server_time" class="hide">', time() * 1000, '</div>
+			<div id="client_time" class="hide"></div>
+			<div id="server_timezone" class="hide">', date("T", time()), '</div>
+			<span id="clock_time">', date("d F Y h:i:s a T", time()), '</span>
+			<span id="clock_label">Official TGS Time</span>
+		</div>
+	</div>
 	
-	echo '
 	<div id="header">';
 	echo !empty($settings['forum_width']) ? '
 		<div id="wrapperheader" style="width: ' . $settings['forum_width'] . '">' : '', '

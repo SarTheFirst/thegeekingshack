@@ -98,27 +98,40 @@ if (is_ie7down && 'attachEvent' in window)
 
 // Dynamic clock at top of page
 function startClock() {
-	var timestamp = parseInt(document.getElementById("time").innerHTML)
-	var today = new Date(timestamp);
-	var day = padTime(today.getDate());
-	var month = today.getMonth();
-	var year = today.getFullYear();
-	var hours = padTime(today.getHours() % 12);
-	var minutes = padTime(today.getMinutes());
-	var seconds = padTime(today.getSeconds());
-	var meridian = (today.getHours < 12 ? "am" : "pm");
+	
+	var nowTimeStamp    = new Date();
+	var serverTimeStamp = parseInt(document.getElementById("server_time").innerHTML);
+	var clientTimeStamp = parseInt(document.getElementById("client_time").innerHTML);
+	var serverTimezone  = document.getElementById("server_timezone").innerHTML;
+	
+	if (isNaN(clientTimeStamp))
+	{
+		clientTimeStamp = nowTimeStamp;
+		document.getElementById("client_time").innerHTML = clientTimeStamp;
+	}
+	
+	var clockTime = new Date();
+	clockTime.value = serverTimeStamp + (nowTimeStamp - clientTimeStamp);
+	
+	var day = padTime(clockTime.getDate());
+	var month = clockTime.getMonth();
+	var year = clockTime.getFullYear();
+	var hours = padTime(clockTime.getHours() % 12);
+	var minutes = padTime(clockTime.getMinutes());
+	var seconds = padTime(clockTime.getSeconds());
+	var meridian = (clockTime.getHours < 12 ? "am" : "pm");
 	
 	var months = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
 	
-	document.getElementById("clock").innerHTML = 
-	day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " ET";
+	document.getElementById("clock_time").innerHTML = 
+	day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " " + serverTimezone;
 	
-	document.getElementById("time").innerHTML = timestamp + 500;
 	var t = setTimeout(startClock, 500);
 }
 
 function padTime(i) {
-	if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+	if (i < 10)
+		i = "0" + i;  // add zero in front of numbers < 10
 	return i;
 }
 

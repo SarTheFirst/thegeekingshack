@@ -1189,6 +1189,7 @@ span.lowerframe span
 	background: #FFF url(../images/theme/spritemenu.png) repeat-x top left;
 	height: 68px;
 }
+
 #main_menu
 {
 	margin: 0;
@@ -4242,4 +4243,40 @@ a.searchad:hover {
 .date_post div
 {
     float: left;
+}
+
+
+/* Styles for the dynamic clock.
+------------------------------------------------------- */
+
+#clock
+{
+	width: 200px;
+	text-align: center;
+}
+
+#clock #clock_time
+{
+	display: inline;
+}
+#clock #clock_label
+{
+	display: none;
+}
+#clock:hover #clock_time
+{
+	display: none;
+}
+#clock:hover #clock_label
+{
+	display: inline;
+}
+
+
+/* Styles for generic use.
+------------------------------------------------------- */
+
+.hide
+{
+	display: none;
 }
