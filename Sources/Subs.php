@@ -222,7 +222,7 @@ if (!defined('SMF'))
 	array safe_unserialize(string data)
 		- sanitizes input before unserializing string.
 */
-include 'staff_codes.php';
+//include 'staff_codes.php';
 
 // Update some basic statistics...
 function updateStats($type, $parameter1 = null, $parameter2 = null)
@@ -1594,7 +1594,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $parse_tags = arra
 			),
 		);
 
-		$codes = get_staff_codes($codes);
+//		$codes = get_staff_codes($codes);
 		// Let mods add new BBC without hassle.
 		call_integration_hook('integrate_bbc_codes', array(&$codes));
 

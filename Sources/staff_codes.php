@@ -1,5 +1,5 @@
 <?php
-function get_staff_codes($codes){
+function get_staff_codes(&$codes){
     // This is for the staff tags
     $staff = array(
         "anna",
@@ -34,7 +34,8 @@ function get_staff_codes($codes){
                     "sam", 
                     "cari", 
                     "beth",
-                    "caleb");
+                    "caleb",
+                    "jen");
     $nonStaff =  array_intersect($hsArray, $staff);
     foreach($staff as $s) {
         array_push($codes, array(
@@ -43,6 +44,6 @@ function get_staff_codes($codes){
             'after' => '</span>',
         ));
     }
-    return $codes;
+    //return $codes;
 }
 ?>
