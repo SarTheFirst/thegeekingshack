@@ -10,7 +10,7 @@ elseif (!defined('SMF'))
 		
 $hooks = array(
 	'integrate_pre_include' => '$sourcedir/staff_codes.php',
-	'integrate_bbc_codes', 'get_staff_codes'
+	'integrate_bbc_codes' => 'get_staff_codes'
 );
 
 foreach ($hooks as $hook => $function)
