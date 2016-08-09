@@ -119,7 +119,7 @@ function template_html_above()
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/script.js?fin20"></script>
 	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/moment.js?fin01"></script>
 	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/moment-timezone.js?fin01"></script>
-	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin26"></script>
+	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin28"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		var smf_theme_url = "', $settings['theme_url'], '";
 		var smf_default_theme_url = "', $settings['default_theme_url'], '";
@@ -217,8 +217,7 @@ function template_body_above()
 		</div>' : '';
 	echo '
 		<div id="clock">
-			<div id="server_time" class="hide">', time() * 1000, '</div>
-			<span id="clock_time">', date("d F Y h:i:s a T", time()), '</span>
+			<span id="clock_time">', date("F d, Y h:i:s a T", time()), '</span>
 			<span id="clock_label">Official TGS Time</span>
 		</div>
 	</div>

@@ -98,22 +98,17 @@ if (is_ie7down && 'attachEvent' in window)
 
 // Dynamic clock at top of page
 function startClock() {
-	if (!/iPad|iPhone|iPod/.test(navigator.userAgent) || window.MSStream)
-	{
-		if (typeof startClock.serverTime == 'undefined')
-			startClock.serverTime = new moment(parseInt(document.getElementById("server_time").innerHTML));
-		if (typeof startClock.clientTime == 'undefined')
-			startClock.clientTime = new moment();
-		
-		var lapseSinceLoad = moment.duration(moment().format('x') - startClock.clientTime.format('x'))
-		var clockTime = startClock.serverTime.clone().add(lapseSinceLoad);
-		//new moment(serverTime + (nowTime - clientTime));
-		
-		document.getElementById("clock_time").innerHTML = clockTime.tz('America/New_York').format("MMMM DD, YYYY hh:mm:ss z");
-		//day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " " + serverTimezone;
-		
-		var t = setTimeout(startClock, 500);
-	}
+	if (typeof startClock.serverTime == 'undefined')
+		startClock.serverTime = new moment.tz(document.getElementById("clock_time").innerHTML, "MMMM DD, YYYY hh:mm:ss a \E\D\T", "EST5EDT");
+	if (typeof startClock.clientTime == 'undefined')
+		startClock.clientTime = new moment();
+	
+	var lapseSinceLoad = moment.duration(moment().diff(startClock.clientTime));
+	var clockTime = startClock.serverTime.clone().add(lapseSinceLoad);
+	
+	document.getElementById("clock_time").innerHTML = clockTime.tz("EST5EDT").format("MMMM DD, YYYY hh:mm:ss a z");
+	
+	var t = setTimeout(startClock, 500);
 }
 
 addLoadEvent(startClock);
