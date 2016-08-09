@@ -98,41 +98,22 @@ if (is_ie7down && 'attachEvent' in window)
 
 // Dynamic clock at top of page
 function startClock() {
-	
-	var nowTimeStamp    = new Date();
-	var serverTimeStamp = parseInt(document.getElementById("server_time").innerHTML);
-	var clientTimeStamp = parseInt(document.getElementById("client_time").innerHTML);
-	var serverTimezone  = document.getElementById("server_timezone").innerHTML;
-	
-	if (isNaN(clientTimeStamp))
+	if (!/iPad|iPhone|iPod/.test(navigator.userAgent) || window.MSStream)
 	{
-		clientTimeStamp = nowTimeStamp;
-		document.getElementById("client_time").innerHTML = clientTimeStamp;
+		if (typeof startClock.serverTime == 'undefined')
+			startClock.serverTime = new moment(parseInt(document.getElementById("server_time").innerHTML));
+		if (typeof startClock.clientTime == 'undefined')
+			startClock.clientTime = new moment();
+		
+		var lapseSinceLoad = moment.duration(moment().format('x') - startClock.clientTime.format('x'))
+		var clockTime = startClock.serverTime.clone().add(lapseSinceLoad);
+		//new moment(serverTime + (nowTime - clientTime));
+		
+		document.getElementById("clock_time").innerHTML = clockTime.tz('America/New_York').format("MMMM DD, YYYY hh:mm:ss z");
+		//day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " " + serverTimezone;
+		
+		var t = setTimeout(startClock, 500);
 	}
-	
-	var clockTime = new Date();
-	clockTime.value = serverTimeStamp + (nowTimeStamp - clientTimeStamp);
-	
-	var day = padTime(clockTime.getDate());
-	var month = clockTime.getMonth();
-	var year = clockTime.getFullYear();
-	var hours = padTime(clockTime.getHours() % 12);
-	var minutes = padTime(clockTime.getMinutes());
-	var seconds = padTime(clockTime.getSeconds());
-	var meridian = (clockTime.getHours < 12 ? "am" : "pm");
-	
-	var months = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
-	
-	document.getElementById("clock_time").innerHTML = 
-	day + " " + months[month] + " " + year + " " + hours + ":" + minutes + ":" + seconds + " " + meridian + " " + serverTimezone;
-	
-	var t = setTimeout(startClock, 500);
-}
-
-function padTime(i) {
-	if (i < 10)
-		i = "0" + i;  // add zero in front of numbers < 10
-	return i;
 }
 
 addLoadEvent(startClock);
