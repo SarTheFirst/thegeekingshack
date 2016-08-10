@@ -94,4 +94,21 @@ var smf_addListItemHoverEvents = function()
 // Add hover events to list items if the browser requires it.
 if (is_ie7down && 'attachEvent' in window)
 	window.attachEvent('onload', smf_addListItemHoverEvents);
+
+
+// Dynamic clock at top of page
+function startClock() {
+	if (typeof startClock.serverTime == 'undefined')
+		startClock.serverTime = new moment.tz(document.getElementById("clock_time").innerHTML, "MMMM DD, YYYY hh:mm:ss a \E\D\T", "EST5EDT");
+	if (typeof startClock.clientTime == 'undefined')
+		startClock.clientTime = new moment();
 	
+	var lapseSinceLoad = moment.duration(moment().diff(startClock.clientTime));
+	var clockTime = startClock.serverTime.clone().add(lapseSinceLoad);
+	
+	document.getElementById("clock_time").innerHTML = clockTime.tz("EST5EDT").format("MMMM DD, YYYY hh:mm:ss a z");
+	
+	var t = setTimeout(startClock, 500);
+}
+
+addLoadEvent(startClock);

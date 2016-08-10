@@ -1186,9 +1186,10 @@ span.lowerframe span
 ------------------------------------------------------- */
 #content_mainmenu
 {
-	background: #FFF url(../images/theme/spritemenu.png) repeat-x top left;
+	background: #FFF /* url(../images/theme/spritemenu.png) Note: PNG missing from filesystem */ repeat-x top left;
 	height: 68px;
 }
+
 #main_menu
 {
 	margin: 0;
@@ -4012,6 +4013,13 @@ span.hidelink
     color: #333333;
     text-decoration:none;
 }
+
+#menu #clock {
+    float: right;
+    color: #656565;
+    padding: 5px 20px;
+    margin-right: 5%;
+}
 /* custom menu */
 .custommenu li a.active,
 .custommenu li a.active span.firstlevel,
@@ -4235,4 +4243,40 @@ a.searchad:hover {
 .date_post div
 {
     float: left;
+}
+
+
+/* Styles for the dynamic clock.
+------------------------------------------------------- */
+
+#clock
+{
+	width: 200px;
+	text-align: center;
+}
+
+#clock #clock_time
+{
+	display: inline;
+}
+#clock #clock_label
+{
+	display: none;
+}
+#clock:hover #clock_time
+{
+	display: none;
+}
+#clock:hover #clock_label
+{
+	display: inline;
+}
+
+
+/* Styles for generic use.
+------------------------------------------------------- */
+
+.hide
+{
+	display: none;
 }

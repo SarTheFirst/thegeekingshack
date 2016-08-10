@@ -86,7 +86,7 @@ function template_html_above()
 
 	// The ?fin20 part of this link is just here to make sure browsers don't cache it wrongly.
 	echo '
-	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/index', $context['theme_variant'], '.css?fin20" />';
+	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/index', $context['theme_variant'], '.css?fin23" />';
 
 	// Some browsers need an extra stylesheet due to bugs/compatibility issues.
 	foreach (array('ie7', 'ie6', 'webkit') as $cssfix)
@@ -117,7 +117,9 @@ function template_html_above()
 		);
 	</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/script.js?fin20"></script>
-	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin20"></script>
+	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/moment.js?fin01"></script>
+	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/moment-timezone.js?fin01"></script>
+	<script type="text/javascript" src="', $settings['theme_url'], '/scripts/theme.js?fin28"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		var smf_theme_url = "', $settings['theme_url'], '";
 		var smf_default_theme_url = "', $settings['default_theme_url'], '";
@@ -214,12 +216,12 @@ function template_body_above()
 		</ul>', !empty($settings['forum_width']) ? '
 		</div>' : '';
 	echo '
-		<div style="float:right;margin-right:5%;">
-<iframe src="http://free.timeanddate.com/clock/i5beujko/n419/fn2/fc0a3757/tct/pct/tt0/tw0/tm1/th2/ta1/tb2" frameborder="0" width="236" height="21" allowTransparency="true"></iframe>
+		<div id="clock">
+			<span id="clock_time">', date("F d, Y h:i:s a T", time()), '</span>
+			<span id="clock_label">Official TGS Time</span>
 		</div>
-	</div>';
+	</div>
 	
-	echo '
 	<div id="header">';
 	echo !empty($settings['forum_width']) ? '
 		<div id="wrapperheader" style="width: ' . $settings['forum_width'] . '">' : '', '
