@@ -1548,6 +1548,10 @@ function loadAllPermissions($loadType = 'classic')
 		'post',
 	);
 
+	// Geek Coins Award/Dock
+	$permissionList['board']['award_geek_coins'] = array(false, 'general_board', 'moderate');
+	$permissionList['board']['dock_geek_coins'] = array(false, 'general_board', 'moderate');
+
 	// We need to know what permissions we can't give to guests.
 	loadIllegalGuestPermissions();
 

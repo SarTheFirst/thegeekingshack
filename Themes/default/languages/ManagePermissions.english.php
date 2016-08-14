@@ -342,4 +342,9 @@ $txt['auto_approve_topics'] = 'Post new topics, without requiring approval';
 $txt['auto_approve_replies'] = 'Post replies to topics, without requiring approval';
 $txt['auto_approve_attachments'] = 'Post attachments, without requiring approval';
 
+// Geek Coins Award/Dock
+$txt['permissionname_award_geek_coins'] = 'Award Geek Coins';
+$txt['permissionhelp_award_geek_coins'] = 'This permission allows a user to award Geek Coins for any post.';
+$txt['permissionname_dock_geek_coins'] = 'Dock Geek Coins';
+$txt['permissionhelp_dock_geek_coins'] = 'This permission allows a user to dock Geek Coins for any post.';
 ?>
