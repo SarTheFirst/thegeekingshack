@@ -20,16 +20,16 @@ $mmessage = 'Okay faithful users...we\'re attempting to restore an older backup 
 ########## Forum Info ##########
 $mbname = 'The Geeking Shack';		# The name of your forum.
 $language = 'english';		# The default language file set for the forum.
-$boardurl = 'http://thegeekingshack.com';		# URL to your forum's folder. (without the trailing /!)
+$boardurl = '!!!!!';		# URL to your forum's folder. (without the trailing /!)
 $webmaster_email = 'admin@thegeekingshack.com';		# Email address to send emails from. (like noreply@yourdomain.com.)
-$cookiename = 'SMFCookie975';		# Name of the cookie to set for authentication.
+$cookiename = 'TGS_Dev';		# Name of the cookie to set for authentication.
 
 ########## Database Info ##########
 $db_type = 'mysql';
 $db_server = 'localhost';
-$db_name = 'thegeeki_production';
-$db_user = 'thegeeki_smf519';
-$db_passwd = 'P))54bS48S';
+$db_name = '!!!!!';
+$db_user = '!!!!!';
+$db_passwd = '!!!!!';
 $ssi_db_user = '';
 $ssi_db_passwd = '';
 $db_prefix = 'smf_';
@@ -38,9 +38,9 @@ $db_error_send = 1;
 
 ########## Directories/Files ##########
 # Note: These directories do not have to be changed unless you move things.
-$boarddir = '/home/thegeeki/public_html/production';		# The absolute path to the forum's folder. (not just '.'!)
-$sourcedir = '/home/thegeeki/public_html/production/Sources';		# Path to the Sources directory.
-$cachedir = '/home/thegeeki/public_html/production/cache';		# Path to the cache directory.
+$boarddir = '!!!!!';		# The absolute path to the forum's folder. (not just '.'!)
+$sourcedir = '!!!!!/Sources';		# Path to the Sources directory.
+$cachedir = '!!!!!/cache';		# Path to the cache directory.
 
 ########## Error-Catching ##########
 # Note: You shouldn't touch these settings.

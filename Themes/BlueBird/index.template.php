@@ -225,29 +225,32 @@ function template_body_above()
 	<div id="header">';
 	echo !empty($settings['forum_width']) ? '
 		<div id="wrapperheader" style="width: ' . $settings['forum_width'] . '">' : '', '
-			<h1 class="forumtitle" style="color:#eee;">The Geeking Shack';
-				// <a href="', $scripturl, '">', empty($context['header_logo_url_html_safe']) ? '<img src="' . $settings['images_url'] . '/theme/logo.png" alt="' . $context['forum_name'] . '" />' : '<img src="' . $context['header_logo_url_html_safe'] . '" alt="' . $context['forum_name'] . '" />', '</a>
-			echo '</h1>
-
-			<div class="user">';
+			<h1 class="forumtitle">
+				<a href="', $scripturl, '">', empty($context['header_logo_url_html_safe']) ? $context['forum_name'] : '<img src="' . $context['header_logo_url_html_safe'] . '" alt="' . $context['forum_name'] . '" />', '</a>
+			</h1>';
+			
+//	var_dump($context);
 
 	// If the user is logged in, display stuff like their name, new messages, etc.
 	if ($context['user']['is_logged'])
 	{
 			echo '
+			<div class="user">
 				<img class="avatar" src="', empty($context['user']['avatar']) ? '' . $settings['images_url'] . '/theme/noavatar.png' : '' . $context['user']['avatar']['href'] . '', '" alt="', $txt['profile'], '" title="', $txt['profile'], '" />
 				<h3 class="greeting">', $context['user']['name'], '</h3>
 				<hr class="divisorh" />
 				<ul class="reset">
 					<li><a href="', $scripturl, '?action=unread">', $txt['unread_topics_visit'], '</a></li>
 					<li><a href="', $scripturl, '?action=unreadreplies">', $txt['unread_replies'], '</a></li>
-				</ul>';
+				</ul>
+			</div>';
 
 	}
 	// Otherwise they're a guest - this time ask them to either register or login - lazy bums...
 	elseif (!empty($context['show_login_bar']))
 	{
 		echo '
+			<div class="user">
 				<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/sha1.js"></script>
 				<form id="guest_form" action="', $scripturl, '?action=login2" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>
 					<div class="info">', sprintf($txt['welcome_guest'], $txt['guest_title']), '</div>
@@ -269,11 +272,12 @@ function template_body_above()
 
 		echo '
 					<input type="hidden" name="hash_passwrd" value="" />
-				</form>';
+				</form>
+			</div>';
 	}
 
 	echo '
-				</div>', !empty($settings['forum_width']) ? '
+				', !empty($settings['forum_width']) ? '
 		</div>' : '';
 
 	// echo '
