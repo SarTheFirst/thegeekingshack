@@ -98,6 +98,12 @@ function template_html_above()
 	if ($context['right_to_left'])
 		echo '
 	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/rtl.css" />';
+	
+	// JQuery UI & theme stylesheets
+		echo '
+	
+	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="', $settings['theme_url'], '/css/jquery-theme.css" />';
 
 	// Here comes the JavaScript bits!
 	echo '
