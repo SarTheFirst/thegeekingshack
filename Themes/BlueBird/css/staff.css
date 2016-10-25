@@ -15,7 +15,7 @@
 
 .ali{
 	color: #475fd0;
-	font-family: georgia, Verdana, Arial, Helvetica, sans-serif; 
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
 }
 .ali a{
 	color: #9370da;
@@ -31,23 +31,23 @@
 }
 .alura a {
 	color: #b7d7a7;
-}	
+}
 
 .alura a:hover {
 	color: #9db88f;
 }
 .aly {
 	color: black;
-	font-family: georgia, Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 10pt; 
+	font-family: georgia, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
 }
 
 .aly a {
-	color: lightblue; 
+	color: lightblue;
 }
 
 .aly a:hover {
-	color: lightblue; 
+	color: lightblue;
 
 }
 
@@ -100,7 +100,7 @@
 .eve {
 	color: darkviolet;
 	font-family: Century Gothic;
-	font-size: 10pt; 
+	font-size: 10pt;
 }
 .eve a {
 	color: orchid;
@@ -118,15 +118,15 @@
 	color: #f6546a;
 }
 .jade{
-	color: #19b5ef;
+	color: #3c1589;
 	font-family: 'Philosopher', sans-serif;
-	font-size: 11pt;
+	font-size: 12pt;
 }
 .jade a{
-	color:#024e88;
+	color:#bfba51;
 }
 .jade a:hover{
-	color:#740470;
+	color:#912a13;
 }
 .jas {
 	font-family: "Courier New", Courier, monospace;
@@ -174,7 +174,7 @@
 	color: maroon;
 	font-family: ms serif;
 	font-size: 11pt;
-	font-weight: bold; 
+	font-weight: bold;
 	font-style: italic;
 }
 .rad {
@@ -240,7 +240,7 @@
 .xx {
 	color: #007bba;
 	font-family: Calibri, Verdana, Arial, Helvetica, sans-serif;
-	font-size: 10pt; 
+	font-size: 10pt;
 }
 
 .xx a {
